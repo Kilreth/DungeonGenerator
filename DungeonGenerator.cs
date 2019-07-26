@@ -9,9 +9,8 @@ namespace Dungeon_Generator
 {
     class DungeonGenerator
     {
-        private Dungeon dungeon;
+        public Dungeon Dungeon { get; }
         private Random rng;
-        public Dungeon Dungeon { get { return dungeon; } }
 
         public void GenerateRooms(Dungeon dungeon, double roomToDungeonRatio,
                                      int minRoomHeight, int minRoomWidth, int maxRoomHeight, int maxRoomWidth)
@@ -56,9 +55,9 @@ namespace Dungeon_Generator
 
         public DungeonGenerator(int height, int width)
         {
-            dungeon = new Dungeon(height, width);
+            Dungeon = new Dungeon(height, width);
             rng = new Random();
-            GenerateRooms(dungeon, 0.9, 3, 3, 9, 9);
+            GenerateRooms(Dungeon, 0.9, 3, 3, 9, 9);
         }
     }
 }

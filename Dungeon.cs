@@ -10,17 +10,14 @@ namespace Dungeon_Generator
     {
         public int Height { get; }
         public int Width { get; }
-        public Tile[,] Tiles { get { return tiles; } }
-        public List<Room> Rooms { get { return rooms; } }
-
-        private Tile[,] tiles;
-        private List<Room> rooms;
+        public Tile[,] Tiles { get; private set; }
+        public List<Room> Rooms { get; private set; }
 
         public Tile GetTile(int row, int col)
         {
             //if (row < 0 || col < 0 || row >= Height || col >= Width)
             //    return null;
-            return tiles[row, col];
+            return Tiles[row, col];
         }
 
         public void CarveRoom(Room room)
@@ -31,10 +28,10 @@ namespace Dungeon_Generator
             {
                 for (int col = room.FirstCol; col < colToStop; col++)
                 {
-                    tiles[row, col].Space = Tile.Type.Room;
+                    Tiles[row, col].Space = Tile.Type.Room;
                 }
             }
-            rooms.Add(room);
+            Rooms.Add(room);
         }
 
         /// <summary>
@@ -60,8 +57,8 @@ namespace Dungeon_Generator
         {
             Height = height;
             Width = width;
-            tiles = Initialize(height, width);
-            rooms = new List<Room>();
+            Tiles = Initialize(height, width);
+            Rooms = new List<Room>();
         }
     }
 }

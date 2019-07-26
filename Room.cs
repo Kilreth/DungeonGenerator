@@ -11,15 +11,11 @@ namespace Dungeon_Generator
     /// </summary>
     public class Room
     {
-        private int firstRow;
-        private int firstCol;
-        private int height;
-        private int width;
 
-        public int FirstRow { get { return firstRow; } }
-        public int FirstCol { get { return firstCol; } }
-        public int Height { get { return height; } }
-        public int Width { get { return width; } }
+        public int FirstRow { get; private set; }
+        public int FirstCol { get; private set; }
+        public int Height { get; private set; }
+        public int Width { get; private set; }
 
         public bool CanRoomFit(Dungeon dungeon)
         {
@@ -52,10 +48,10 @@ namespace Dungeon_Generator
 
         private void Initialise(int firstRow, int firstCol, int height, int width)
         {
-            this.firstRow = firstRow;
-            this.firstCol = firstCol;
-            this.height = height;
-            this.width = width;
+            FirstRow = firstRow;
+            FirstCol = firstCol;
+            Height = height;
+            Width = width;
         }
 
         public void Replace(int firstRow, int firstCol, int height, int width)
