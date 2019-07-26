@@ -13,35 +13,6 @@ namespace Dungeon_Generator
         private Random rng;
         public Dungeon Dungeon { get { return dungeon; } }
 
-        private bool CanRoomFit(Dungeon dungeon, Room room)
-        {
-            Room roomIncWalls = new Room(room.FirstRow - 1, room.FirstCol - 1,
-                                         room.Height + 2, room.Width + 2);
-
-            // is origin corner within the dungeon?
-            if (roomIncWalls.FirstRow < 0 || roomIncWalls.FirstCol < 0)
-                return false;
-            // is far corner within the dungeon?
-            if (roomIncWalls.FirstRow + roomIncWalls.Height - 1 >= dungeon.Height)
-                return false;
-            if (roomIncWalls.FirstCol + roomIncWalls.Width - 1 >= dungeon.Width)
-                return false;
-
-            int rowToStop = roomIncWalls.FirstRow + roomIncWalls.Height;
-            int colToStop = roomIncWalls.FirstCol + roomIncWalls.Width;
-            for (int row = roomIncWalls.FirstRow; row < rowToStop; row++)
-            {
-                for (int col = roomIncWalls.FirstCol; col < colToStop; col++)
-                {
-                    if (dungeon.GetTile(row, col).Space != Tile.Type.Solid)
-                    {
-                        return false;
-                    }
-                }
-            }
-            return true;
-        }
-
         public void GenerateRooms(Dungeon dungeon, double roomToDungeonRatio,
                                      int minRoomHeight, int minRoomWidth, int maxRoomHeight, int maxRoomWidth)
         {
@@ -73,7 +44,7 @@ namespace Dungeon_Generator
                     col = rng.Next(1, dungeon.Width - roomWidth);
                     room.Replace(row, col, roomHeight, roomWidth);
                     ++attempts;
-                } while (!CanRoomFit(dungeon, room) && attempts != 100);
+                } while (!room.CanRoomFit(dungeon) && attempts != 100);
                 if (attempts == 100)
                 {
                     break;

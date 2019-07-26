@@ -10,10 +10,11 @@ namespace Dungeon_Generator
     {
         public int Height { get; }
         public int Width { get; }
-        private Tile[,] tiles;
-        private List<Room> rooms;
         public Tile[,] Tiles { get { return tiles; } }
         public List<Room> Rooms { get { return rooms; } }
+
+        private Tile[,] tiles;
+        private List<Room> rooms;
 
         public Tile GetTile(int row, int col)
         {
