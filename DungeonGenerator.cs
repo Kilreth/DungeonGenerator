@@ -10,7 +10,7 @@ namespace Dungeon_Generator
     class DungeonGenerator
     {
         public Dungeon Dungeon { get; }
-        private Random rng;
+        public static Random Rng { get; }
 
         public void GenerateRooms(Dungeon dungeon, double roomToDungeonRatio,
                                      int minRoomHeight, int minRoomWidth, int maxRoomHeight, int maxRoomWidth)
@@ -28,8 +28,8 @@ namespace Dungeon_Generator
                 int roomHeight, roomWidth;
                 do
                 {
-                    roomHeight = rng.Next(minRoomHeight, maxRoomHeight + 1);
-                    roomWidth  = rng.Next(minRoomWidth,  maxRoomWidth  + 1);
+                    roomHeight = Rng.Next(minRoomHeight, maxRoomHeight + 1);
+                    roomWidth  = Rng.Next(minRoomWidth,  maxRoomWidth  + 1);
                 } while (roomHeight * roomWidth > remainingRoomTiles);
 
                 // create the room and put it in a random place
@@ -39,8 +39,8 @@ namespace Dungeon_Generator
                 int attempts = 0;
                 do
                 {
-                    row = rng.Next(1, dungeon.Height - roomHeight);
-                    col = rng.Next(1, dungeon.Width - roomWidth);
+                    row = Rng.Next(1, dungeon.Height - roomHeight);
+                    col = Rng.Next(1, dungeon.Width - roomWidth);
                     room.Replace(row, col, roomHeight, roomWidth);
                     ++attempts;
                 } while (!room.CanRoomFit(dungeon) && attempts != 100);
@@ -56,8 +56,12 @@ namespace Dungeon_Generator
         public DungeonGenerator(int height, int width)
         {
             Dungeon = new Dungeon(height, width);
-            rng = new Random();
             GenerateRooms(Dungeon, 0.9, 3, 3, 9, 9);
+        }
+
+        static DungeonGenerator()
+        {
+            Rng = new Random();
         }
     }
 }
