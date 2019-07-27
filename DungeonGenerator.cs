@@ -53,11 +53,12 @@ namespace Dungeon_Generator
 
                 Room room = new Room(0, 0, 0, 0);
                 int row, col;
+                int dungeonEdge = 3;
                 int attempts = 0;
                 do
                 {
-                    row = Rng.Next(1, dungeon.Height - roomHeight);
-                    col = Rng.Next(1, dungeon.Width - roomWidth);
+                    row = Rng.Next(dungeonEdge, dungeon.Height - roomHeight - dungeonEdge + 1);
+                    col = Rng.Next(dungeonEdge, dungeon.Width - roomWidth - dungeonEdge + 1);
                     room.Replace(row, col, roomHeight, roomWidth);
                     ++attempts;
                 } while (!room.CanRoomFit(dungeon) && attempts != 100);

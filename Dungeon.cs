@@ -15,8 +15,6 @@ namespace Dungeon_Generator
 
         public Tile GetTile(int row, int col)
         {
-            //if (row < 0 || col < 0 || row >= Height || col >= Width)
-            //    return null;
             return Tiles[row, col];
         }
 
@@ -51,27 +49,37 @@ namespace Dungeon_Generator
         /// <summary>
         /// Creates and returns a blank slate for a dungeon.
         /// </summary>
-        /// <param name="height">total dungeon rows</param>
-        /// <param name="width">total dungeon columns</param>
-        /// <returns>2D array of solid dungeon tiles</returns>
-        public Tile[,] Initialize(int height, int width)
+        public void Initialize()
         {
-            Tile[,] dungeon = new Tile[height, width];
-            for (int row = 0; row < height; row++)
+            Tiles = new Tile[Height, Width];
+
+            // impervious granite edge of the dungeon
+            for (int row = 0; row < Height; row++)
             {
-                for (int col = 0; col < width; col++)
+                Tiles[row, 0] = new Tile(row, 0, Tile.Type.Granite);
+                Tiles[row, Width-1] = new Tile(row, Width-1, Tile.Type.Granite);
+            }
+            for (int col = 0; col < Width; col++)
+            {
+                Tiles[0, col] = new Tile(0, col, Tile.Type.Granite);
+                Tiles[Height-1, col] = new Tile(Height-1, col, Tile.Type.Granite);
+            }
+
+            // rock interior
+            for (int row = 1; row < Height-1; row++)
+            {
+                for (int col = 1; col < Width-1; col++)
                 {
-                    dungeon[row, col] = new Tile(row, col, Tile.Type.Rock);
+                    Tiles[row, col] = new Tile(row, col, Tile.Type.Rock);
                 }
             }
-            return dungeon;
         }
 
         public Dungeon(int height, int width)
         {
             Height = height;
             Width = width;
-            Tiles = Initialize(height, width);
+            Initialize();
             Rooms = new List<Room>();
         }
     }

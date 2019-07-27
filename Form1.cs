@@ -26,8 +26,9 @@ namespace Dungeon_Generator
         private void Form1_Paint(object sender, PaintEventArgs e)
         {
             Graphics graphics = CreateGraphics();
-            Brush rockBrush = new SolidBrush(Color.Gray);
             Brush edgeBrush = new SolidBrush(Color.Black);
+            Brush graniteBrush = new SolidBrush(Color.Brown);
+            Brush rockBrush = new SolidBrush(Color.Gray);
             Brush wallBrush = new SolidBrush(Color.DarkRed);
             Brush pathBrush = new SolidBrush(Color.DarkBlue);
             Brush roomBrush = new SolidBrush(Color.LightGray);
@@ -53,6 +54,10 @@ namespace Dungeon_Generator
                     else if (tiles[row, col].Space == Tile.Type.Wall)
                     {
                         brush = wallBrush;
+                    }
+                    else if (tiles[row, col].Space == Tile.Type.Granite)
+                    {
+                        brush = graniteBrush;
                     }
                     graphics.FillRectangle(edgeBrush, new Rectangle(
                             startX + col * tileSize, startY + row * tileSize, tileSize, tileSize));

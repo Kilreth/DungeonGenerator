@@ -12,7 +12,7 @@ namespace Dungeon_Generator
         public int Col { get; }
         public Type Space { get; set; }
 
-        public enum Type { Rock, Path, Room, Wall }
+        public enum Type { Granite, Rock, Path, Room, Wall }
 
         public Tile(int row, int col, Type type)
         {
