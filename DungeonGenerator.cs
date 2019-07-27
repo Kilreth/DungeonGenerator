@@ -12,6 +12,24 @@ namespace Dungeon_Generator
         public Dungeon Dungeon { get; }
         public static Random Rng { get; }
 
+        public bool IsTileConnected(Dungeon dungeon, Tile tile, Tile from)
+        {
+            List<Tile> adjacent = new List<Tile>();
+            adjacent.Add(dungeon.GetTile(tile.Row - 1, tile.Col));
+            adjacent.Add(dungeon.GetTile(tile.Row + 1, tile.Col));
+            adjacent.Add(dungeon.GetTile(tile.Row, tile.Col - 1));
+            adjacent.Add(dungeon.GetTile(tile.Row, tile.Col + 1));
+            adjacent.Remove(from);
+            foreach (Tile adjacentTile in adjacent)
+            {
+                if (adjacentTile.Space == Tile.Type.Path || adjacentTile.Space == Tile.Type.Wall)
+                {
+                    return true;
+                }
+            }
+            return false;
+        }
+
         public void GenerateCorridor(Dungeon dungeon, Tile door)
         {
 

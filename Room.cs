@@ -42,7 +42,9 @@ namespace Dungeon_Generator
             {
                 for (int col = Outer.FirstCol; col < colToStop; col++)
                 {
-                    if (dungeon.GetTile(row, col).Space != Tile.Type.Rock)
+                    // Excluding walls here allows walls to be shared by rooms
+                    if (dungeon.GetTile(row, col).Space != Tile.Type.Rock
+                        && dungeon.GetTile(row, col).Space != Tile.Type.Wall)
                     {
                         return false;
                     }
@@ -82,15 +84,24 @@ namespace Dungeon_Generator
         {
             InitialiseOuter();
             walls = new List<Tile>();
+            Tile tile = null;
             for (int row = FirstRow; row < FirstRow + Height; row++)
             {
-                walls.Add(dungeon.GetTile(row, Outer.FirstCol));
-                walls.Add(dungeon.GetTile(row, Outer.FirstCol + Outer.Width - 1));
+                tile = dungeon.GetTile(row, Outer.FirstCol);
+                tile.Direction = Tile.Compass.Left;
+                walls.Add(tile);
+                tile = dungeon.GetTile(row, Outer.FirstCol + Outer.Width - 1);
+                tile.Direction = Tile.Compass.Right;
+                walls.Add(tile);
             }
             for (int col = FirstCol; col < FirstCol + Width; col++)
             {
-                walls.Add(dungeon.GetTile(Outer.FirstRow, col));
-                walls.Add(dungeon.GetTile(Outer.FirstRow + Outer.Height - 1, col));
+                tile = dungeon.GetTile(Outer.FirstRow, col);
+                tile.Direction = Tile.Compass.Up;
+                walls.Add(tile);
+                tile = dungeon.GetTile(Outer.FirstRow + Outer.Height - 1, col);
+                tile.Direction = Tile.Compass.Down;
+                walls.Add(tile);
             }
         }
 

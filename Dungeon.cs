@@ -13,6 +13,31 @@ namespace Dungeon_Generator
         public Tile[,] Tiles { get; private set; }
         public List<Room> Rooms { get; private set; }
 
+        public Tile GetTileByDirection(Tile tile)
+        {
+            return GetTileByDirection(tile, tile.Direction);
+        }
+
+        public Tile GetTileByDirection(Tile tile, Tile.Compass direction)
+        {
+            if (direction == Tile.Compass.Up)
+            {
+                return Tiles[tile.Row - 1, tile.Col];
+            }
+            else if (direction == Tile.Compass.Down)
+            {
+                return Tiles[tile.Row + 1, tile.Col];
+            }
+            else if (direction == Tile.Compass.Left)
+            {
+                return Tiles[tile.Row, tile.Col - 1];
+            }
+            else //if (direction == Tile.Compass.Right)
+            {
+                return Tiles[tile.Row, tile.Col + 1];
+            }
+        }
+
         public Tile GetTile(int row, int col)
         {
             return Tiles[row, col];
@@ -22,7 +47,9 @@ namespace Dungeon_Generator
         {
             foreach (Tile tile in room.Doors)
             {
-                Tiles[tile.Row, tile.Col].Space = Tile.Type.Path;
+                tile.Space = Tile.Type.Path;
+                // BELOW IS TEMPORARY
+                GetTileByDirection(tile).Space = Tile.Type.Path;
             }
         }
 
