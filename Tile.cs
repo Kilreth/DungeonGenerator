@@ -8,7 +8,7 @@ namespace Dungeon_Generator
 {
     public class Tile
     {
-        public enum Type { Solid, Path, Room }
+        public enum Type { Rock, Path, Room, Wall }
 
         public Type Space { get; set; }
 

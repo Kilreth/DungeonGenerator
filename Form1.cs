@@ -26,20 +26,21 @@ namespace Dungeon_Generator
         private void Form1_Paint(object sender, PaintEventArgs e)
         {
             Graphics graphics = CreateGraphics();
+            Brush rockBrush = new SolidBrush(Color.Gray);
             Brush edgeBrush = new SolidBrush(Color.Black);
-            Brush wallBrush = new SolidBrush(Color.Gray);
-            Brush pathBrush = new SolidBrush(Color.LightBlue);
+            Brush wallBrush = new SolidBrush(Color.DarkRed);
+            Brush pathBrush = new SolidBrush(Color.DarkBlue);
             Brush roomBrush = new SolidBrush(Color.LightGray);
-            Brush brush = wallBrush;
+            Brush brush = null;
 
             Tile[,] tiles = dungeon.Tiles;
             for (int row = 0; row < tiles.GetLength(0); row++)
             {
                 for (int col = 0; col < tiles.GetLength(1); col++)
                 {
-                    if (tiles[row, col].Space == Tile.Type.Solid)
+                    if (tiles[row, col].Space == Tile.Type.Rock)
                     {
-                        brush = wallBrush;
+                        brush = rockBrush;
                     }
                     else if (tiles[row, col].Space == Tile.Type.Path)
                     {
@@ -48,6 +49,10 @@ namespace Dungeon_Generator
                     else if (tiles[row, col].Space == Tile.Type.Room)
                     {
                         brush = roomBrush;
+                    }
+                    else if (tiles[row, col].Space == Tile.Type.Wall)
+                    {
+                        brush = wallBrush;
                     }
                     graphics.FillRectangle(edgeBrush, new Rectangle(
                             startX + col * tileSize, startY + row * tileSize, tileSize, tileSize));

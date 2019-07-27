@@ -28,7 +28,7 @@ namespace Dungeon_Generator
             }
         }
 
-        public void CarveRoom(Room room)
+        private void CarveRoomHelper(Room room, Tile.Type material)
         {
             int rowToStop = room.FirstRow + room.Height;
             int colToStop = room.FirstCol + room.Width;
@@ -36,9 +36,15 @@ namespace Dungeon_Generator
             {
                 for (int col = room.FirstCol; col < colToStop; col++)
                 {
-                    Tiles[row, col].Space = Tile.Type.Room;
+                    Tiles[row, col].Space = material;
                 }
             }
+        }
+
+        public void CarveRoom(Room room)
+        {
+            CarveRoomHelper(room.Outer, Tile.Type.Wall);
+            CarveRoomHelper(room, Tile.Type.Room);
             Rooms.Add(room);
         }
 
@@ -55,7 +61,7 @@ namespace Dungeon_Generator
             {
                 for (int col = 0; col < width; col++)
                 {
-                    dungeon[row, col] = new Tile(Tile.Type.Solid);
+                    dungeon[row, col] = new Tile(Tile.Type.Rock);
                 }
             }
             return dungeon;

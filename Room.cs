@@ -35,13 +35,14 @@ namespace Dungeon_Generator
             if (Outer.FirstCol + Outer.Width - 1 >= dungeon.Width)
                 return false;
 
+            // does the room including outer walls overlap with anything?
             int rowToStop = Outer.FirstRow + Outer.Height;
             int colToStop = Outer.FirstCol + Outer.Width;
             for (int row = Outer.FirstRow; row < rowToStop; row++)
             {
                 for (int col = Outer.FirstCol; col < colToStop; col++)
                 {
-                    if (dungeon.GetTile(row, col).Space != Tile.Type.Solid)
+                    if (dungeon.GetTile(row, col).Space != Tile.Type.Rock)
                     {
                         return false;
                     }
