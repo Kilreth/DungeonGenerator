@@ -16,26 +16,30 @@ namespace Dungeon_Generator
         public int FirstCol { get; private set; }
         public int Height { get; private set; }
         public int Width { get; private set; }
+        public int NumTiles { get; private set; }
+
+        public Room Outer { get; private set; }
+        public List<Location> Entrances { get; private set; }
+        private List<Location> walls { get; set; }
 
         public bool CanRoomFit(Dungeon dungeon)
         {
-            Room roomIncWalls = new Room(FirstRow - 1, FirstCol - 1,
-                                         Height + 2, Width + 2);
+            InitialiseOuter();
 
             // is origin corner within the dungeon?
-            if (roomIncWalls.FirstRow < 0 || roomIncWalls.FirstCol < 0)
+            if (Outer.FirstRow < 0 || Outer.FirstCol < 0)
                 return false;
             // is far corner within the dungeon?
-            if (roomIncWalls.FirstRow + roomIncWalls.Height - 1 >= dungeon.Height)
+            if (Outer.FirstRow + Outer.Height - 1 >= dungeon.Height)
                 return false;
-            if (roomIncWalls.FirstCol + roomIncWalls.Width - 1 >= dungeon.Width)
+            if (Outer.FirstCol + Outer.Width - 1 >= dungeon.Width)
                 return false;
 
-            int rowToStop = roomIncWalls.FirstRow + roomIncWalls.Height;
-            int colToStop = roomIncWalls.FirstCol + roomIncWalls.Width;
-            for (int row = roomIncWalls.FirstRow; row < rowToStop; row++)
+            int rowToStop = Outer.FirstRow + Outer.Height;
+            int colToStop = Outer.FirstCol + Outer.Width;
+            for (int row = Outer.FirstRow; row < rowToStop; row++)
             {
-                for (int col = roomIncWalls.FirstCol; col < colToStop; col++)
+                for (int col = Outer.FirstCol; col < colToStop; col++)
                 {
                     if (dungeon.GetTile(row, col).Space != Tile.Type.Solid)
                     {
@@ -46,12 +50,73 @@ namespace Dungeon_Generator
             return true;
         }
 
+        public void GenerateEntrances(double doorToWallRatio)
+        {
+            FindWallLocations();
+
+            // How many entrances will we make?
+            int numEntrances = (int) (walls.Count * doorToWallRatio);
+            numEntrances += DungeonGenerator.Rng.Next(-1, 2);   // add -1, 0, or 1
+            if (numEntrances == 0)
+            {
+                ++numEntrances;
+            }
+
+            Entrances = new List<Location>();
+            while (Entrances.Count < numEntrances)
+            {
+                int index = DungeonGenerator.Rng.Next(0, walls.Count);
+                if (!Entrances.Contains(walls[index]))
+                {
+                    Entrances.Add(walls[index]);
+                }
+            }
+        }
+
+        /// <summary>
+        /// Finds coordinates of all tiles with an edge next to the room.
+        /// Corners are excluded.
+        /// </summary>
+        public void FindWallLocations()
+        {
+            InitialiseOuter();
+            walls = new List<Location>();
+            for (int row = FirstRow; row < FirstRow + Height; row++)
+            {
+                walls.Add(new Location(row, Outer.FirstCol));
+                walls.Add(new Location(row, Outer.FirstCol + Outer.Width - 1));
+            }
+            for (int col = FirstCol; col < FirstCol + Width; col++)
+            {
+                walls.Add(new Location(Outer.FirstRow, col));
+                walls.Add(new Location(Outer.FirstRow + Outer.Height - 1, col));
+            }
+        }
+
+        private void SetNumTiles()
+        {
+            NumTiles = Height * Width;
+        }
+
+        private void InitialiseOuter()
+        {
+            if (Outer == null)
+            {
+                Outer = new Room(FirstRow - 1, FirstCol - 1, Height + 2, Width + 2);
+            }
+        }
+
         private void Initialise(int firstRow, int firstCol, int height, int width)
         {
             FirstRow = firstRow;
             FirstCol = firstCol;
             Height = height;
             Width = width;
+            SetNumTiles();
+
+            Outer = null;
+            Entrances = null;
+            walls = null;
         }
 
         public void Replace(int firstRow, int firstCol, int height, int width)

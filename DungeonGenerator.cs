@@ -7,10 +7,19 @@ using System.Diagnostics;
 
 namespace Dungeon_Generator
 {
-    class DungeonGenerator
+    public class DungeonGenerator
     {
         public Dungeon Dungeon { get; }
         public static Random Rng { get; }
+
+        public void GenerateEntrances(Dungeon dungeon, double doorToWallRatio)
+        {
+            foreach (Room room in dungeon.Rooms)
+            {
+                room.GenerateEntrances(doorToWallRatio);
+                dungeon.CarveRoomDoors(room);
+            }
+        }
 
         public void GenerateRooms(Dungeon dungeon, double roomToDungeonRatio,
                                      int minRoomHeight, int minRoomWidth, int maxRoomHeight, int maxRoomWidth)
@@ -57,6 +66,7 @@ namespace Dungeon_Generator
         {
             Dungeon = new Dungeon(height, width);
             GenerateRooms(Dungeon, 0.9, 3, 3, 9, 9);
+            GenerateEntrances(Dungeon, 0.1);
         }
 
         static DungeonGenerator()

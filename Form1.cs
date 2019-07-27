@@ -28,7 +28,7 @@ namespace Dungeon_Generator
             Graphics graphics = CreateGraphics();
             Brush edgeBrush = new SolidBrush(Color.Black);
             Brush wallBrush = new SolidBrush(Color.Gray);
-            Brush pathBrush = new SolidBrush(Color.DimGray);
+            Brush pathBrush = new SolidBrush(Color.LightBlue);
             Brush roomBrush = new SolidBrush(Color.LightGray);
             Brush brush = wallBrush;
 

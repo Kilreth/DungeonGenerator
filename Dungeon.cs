@@ -20,6 +20,14 @@ namespace Dungeon_Generator
             return Tiles[row, col];
         }
 
+        public void CarveRoomDoors(Room room)
+        {
+            foreach (Location loc in room.Entrances)
+            {
+                Tiles[loc.Row, loc.Col].Space = Tile.Type.Path;
+            }
+        }
+
         public void CarveRoom(Room room)
         {
             int rowToStop = room.FirstRow + room.Height;
