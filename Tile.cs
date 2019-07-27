@@ -8,13 +8,17 @@ namespace Dungeon_Generator
 {
     public class Tile
     {
-        public enum Type { Rock, Path, Room, Wall }
-
+        public int Row { get; }
+        public int Col { get; }
         public Type Space { get; set; }
 
-        public Tile(Type type)
+        public enum Type { Rock, Path, Room, Wall }
+
+        public Tile(int row, int col, Type type)
         {
-            this.Space = type;
+            Row = row;
+            Col = col;
+            Space = type;
         }
     }
 }

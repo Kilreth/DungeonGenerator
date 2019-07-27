@@ -22,9 +22,9 @@ namespace Dungeon_Generator
 
         public void CarveRoomDoors(Room room)
         {
-            foreach (Location loc in room.Entrances)
+            foreach (Tile tile in room.Entrances)
             {
-                Tiles[loc.Row, loc.Col].Space = Tile.Type.Path;
+                Tiles[tile.Row, tile.Col].Space = Tile.Type.Path;
             }
         }
 
@@ -61,7 +61,7 @@ namespace Dungeon_Generator
             {
                 for (int col = 0; col < width; col++)
                 {
-                    dungeon[row, col] = new Tile(Tile.Type.Rock);
+                    dungeon[row, col] = new Tile(row, col, Tile.Type.Rock);
                 }
             }
             return dungeon;

@@ -12,11 +12,19 @@ namespace Dungeon_Generator
         public Dungeon Dungeon { get; }
         public static Random Rng { get; }
 
+        public void GenerateCorridors(Dungeon dungeon, double turnChance)
+        {
+            foreach (Room room in dungeon.Rooms)
+            {
+                //foreach ()
+            }
+        }
+
         public void GenerateEntrances(Dungeon dungeon, double doorToWallRatio)
         {
             foreach (Room room in dungeon.Rooms)
             {
-                room.GenerateEntrances(doorToWallRatio);
+                room.GenerateEntrances(dungeon, doorToWallRatio);
                 dungeon.CarveRoomDoors(room);
             }
         }

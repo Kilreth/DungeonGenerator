@@ -19,8 +19,8 @@ namespace Dungeon_Generator
         public int NumTiles { get; private set; }
 
         public Room Outer { get; private set; }
-        public List<Location> Entrances { get; private set; }
-        private List<Location> walls { get; set; }
+        public List<Tile> Entrances { get; private set; }
+        private List<Tile> walls { get; set; }
 
         public bool CanRoomFit(Dungeon dungeon)
         {
@@ -51,9 +51,9 @@ namespace Dungeon_Generator
             return true;
         }
 
-        public void GenerateEntrances(double doorToWallRatio)
+        public void GenerateEntrances(Dungeon dungeon, double doorToWallRatio)
         {
-            FindWallLocations();
+            FindWallLocations(dungeon);
 
             // How many entrances will we make?
             int numEntrances = (int) (walls.Count * doorToWallRatio);
@@ -63,7 +63,7 @@ namespace Dungeon_Generator
                 ++numEntrances;
             }
 
-            Entrances = new List<Location>();
+            Entrances = new List<Tile>();
             while (Entrances.Count < numEntrances)
             {
                 int index = DungeonGenerator.Rng.Next(0, walls.Count);
@@ -78,19 +78,19 @@ namespace Dungeon_Generator
         /// Finds coordinates of all tiles with an edge next to the room.
         /// Corners are excluded.
         /// </summary>
-        public void FindWallLocations()
+        public void FindWallLocations(Dungeon dungeon)
         {
             InitialiseOuter();
-            walls = new List<Location>();
+            walls = new List<Tile>();
             for (int row = FirstRow; row < FirstRow + Height; row++)
             {
-                walls.Add(new Location(row, Outer.FirstCol));
-                walls.Add(new Location(row, Outer.FirstCol + Outer.Width - 1));
+                walls.Add(dungeon.GetTile(row, Outer.FirstCol));
+                walls.Add(dungeon.GetTile(row, Outer.FirstCol + Outer.Width - 1));
             }
             for (int col = FirstCol; col < FirstCol + Width; col++)
             {
-                walls.Add(new Location(Outer.FirstRow, col));
-                walls.Add(new Location(Outer.FirstRow + Outer.Height - 1, col));
+                walls.Add(dungeon.GetTile(Outer.FirstRow, col));
+                walls.Add(dungeon.GetTile(Outer.FirstRow + Outer.Height - 1, col));
             }
         }
 
