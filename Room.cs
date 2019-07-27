@@ -19,7 +19,7 @@ namespace Dungeon_Generator
         public int NumTiles { get; private set; }
 
         public Room Outer { get; private set; }
-        public List<Tile> Entrances { get; private set; }
+        public List<Tile> Doors { get; private set; }
         private List<Tile> walls { get; set; }
 
         public bool CanRoomFit(Dungeon dungeon)
@@ -51,25 +51,25 @@ namespace Dungeon_Generator
             return true;
         }
 
-        public void GenerateEntrances(Dungeon dungeon, double doorToWallRatio)
+        public void GenerateDoors(Dungeon dungeon, double doorToWallRatio)
         {
             FindWallLocations(dungeon);
 
-            // How many entrances will we make?
-            int numEntrances = (int) (walls.Count * doorToWallRatio);
-            numEntrances += DungeonGenerator.Rng.Next(-1, 2);   // add -1, 0, or 1
-            if (numEntrances == 0)
+            // How many doors will we make?
+            int numDoors = (int) (walls.Count * doorToWallRatio);
+            numDoors += DungeonGenerator.Rng.Next(-1, 2);   // add -1, 0, or 1
+            if (numDoors == 0)
             {
-                ++numEntrances;
+                ++numDoors;
             }
 
-            Entrances = new List<Tile>();
-            while (Entrances.Count < numEntrances)
+            Doors = new List<Tile>();
+            while (Doors.Count < numDoors)
             {
                 int index = DungeonGenerator.Rng.Next(0, walls.Count);
-                if (!Entrances.Contains(walls[index]))
+                if (!Doors.Contains(walls[index]))
                 {
-                    Entrances.Add(walls[index]);
+                    Doors.Add(walls[index]);
                 }
             }
         }
@@ -116,7 +116,7 @@ namespace Dungeon_Generator
             SetNumTiles();
 
             Outer = null;
-            Entrances = null;
+            Doors = null;
             walls = null;
         }
 

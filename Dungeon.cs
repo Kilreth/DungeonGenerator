@@ -20,7 +20,7 @@ namespace Dungeon_Generator
 
         public void CarveRoomDoors(Room room)
         {
-            foreach (Tile tile in room.Entrances)
+            foreach (Tile tile in room.Doors)
             {
                 Tiles[tile.Row, tile.Col].Space = Tile.Type.Path;
             }

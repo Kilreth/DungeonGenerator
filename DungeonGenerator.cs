@@ -12,19 +12,27 @@ namespace Dungeon_Generator
         public Dungeon Dungeon { get; }
         public static Random Rng { get; }
 
+        public void GenerateCorridor(Dungeon dungeon, Tile door)
+        {
+
+        }
+
         public void GenerateCorridors(Dungeon dungeon, double turnChance)
         {
             foreach (Room room in dungeon.Rooms)
             {
-                //foreach ()
+                foreach (Tile door in room.Doors)
+                {
+                    GenerateCorridor(dungeon, door);
+                }
             }
         }
 
-        public void GenerateEntrances(Dungeon dungeon, double doorToWallRatio)
+        public void GenerateDoors(Dungeon dungeon, double doorToWallRatio)
         {
             foreach (Room room in dungeon.Rooms)
             {
-                room.GenerateEntrances(dungeon, doorToWallRatio);
+                room.GenerateDoors(dungeon, doorToWallRatio);
                 dungeon.CarveRoomDoors(room);
             }
         }
@@ -75,7 +83,7 @@ namespace Dungeon_Generator
         {
             Dungeon = new Dungeon(height, width);
             GenerateRooms(Dungeon, 0.9, 3, 3, 9, 9);
-            GenerateEntrances(Dungeon, 0.1);
+            GenerateDoors(Dungeon, 0.1);
         }
 
         static DungeonGenerator()
