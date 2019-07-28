@@ -40,27 +40,27 @@ namespace Dungeon_Generator
             {
                 for (int col = 0; col < tiles.GetLength(1); col++)
                 {
-                    if (tiles[row, col].Space == Tile.Type.Rock)
+                    if (tiles[row, col].Space == Space.Rock)
                     {
                         brush = rockBrush;
                     }
-                    else if (tiles[row, col].Space == Tile.Type.Path)
+                    else if (tiles[row, col].Space == Space.Path)
                     {
                         brush = pathBrush;
                     }
-                    else if (tiles[row, col].Space == Tile.Type.Room)
+                    else if (tiles[row, col].Space == Space.Room)
                     {
                         brush = roomBrush;
                     }
-                    else if (tiles[row, col].Space == Tile.Type.Door)
+                    else if (tiles[row, col].Space == Space.Door)
                     {
                         brush = doorBrush;
                     }
-                    else if (tiles[row, col].Space == Tile.Type.Wall)
+                    else if (tiles[row, col].Space == Space.Wall)
                     {
                         brush = wallBrush;
                     }
-                    else if (tiles[row, col].Space == Tile.Type.Granite)
+                    else if (tiles[row, col].Space == Space.Granite)
                     {
                         brush = graniteBrush;
                     }

@@ -10,47 +10,47 @@ namespace Dungeon_Generator
     {
         public int Row { get; }
         public int Col { get; }
-        public Type Space { get; set; }
-        public Compass Direction { get; set; }
+        public Space Space { get; set; }
+        public Direction Direction { get; set; }
         public Tile From { get; set; }
 
-        /// <summary>
-        /// Up:    Decreasing rows
-        /// Down:  Increasing rows
-        /// Left:  Decreasing columns
-        /// Right: Increasing columns
-        /// </summary>
-        public enum Compass { None, Up, Down, Left, Right }
-
-        /// <summary>
-        /// Granite: Impervious edge of the dungeon
-        /// Rock:    Solid tile with which to fill the dungeon
-        /// Room:    Vacant tiles in a room
-        /// Wall:    The rock surrounding Room tiles
-        /// Path:    Vacant tiles that make corridors connecting doors
-        /// Door:    Vacant tiles bridging rooms and paths
-        /// </summary>
-        public enum Type { Granite, Rock, Room, Wall, Path, Door }
-
-        public static Compass Invert(Compass direction)
+        public static Direction Invert(Direction direction)
         {
-            if (direction == Compass.None)
+            if (direction == Direction.None)
                 throw new ArgumentNullException("direction", "Direction of tile not set");
-            if (direction == Compass.Up)
-                return Compass.Down;
-            else if (direction == Compass.Down)
-                return Compass.Up;
-            else if (direction == Compass.Left)
-                return Compass.Right;
+            if (direction == Direction.Up)
+                return Direction.Down;
+            else if (direction == Direction.Down)
+                return Direction.Up;
+            else if (direction == Direction.Left)
+                return Direction.Right;
             else //if (direction == Compass.Right)
-                return Compass.Left;
+                return Direction.Left;
         }
 
-        public Tile(int row, int col, Type space)
+        public Tile(int row, int col, Space space)
         {
             Row = row;
             Col = col;
             Space = space;
         }
     }
+
+    /// <summary>
+    /// Up:    Decreasing rows
+    /// Down:  Increasing rows
+    /// Left:  Decreasing columns
+    /// Right: Increasing columns
+    /// </summary>
+    public enum Direction { None, Up, Down, Left, Right }
+
+    /// <summary>
+    /// Granite: Impervious edge of the dungeon
+    /// Rock:    Solid tile with which to fill the dungeon
+    /// Room:    Vacant tiles in a room
+    /// Wall:    The rock surrounding Room tiles
+    /// Path:    Vacant tiles that make corridors connecting doors
+    /// Door:    Vacant tiles bridging rooms and paths
+    /// </summary>
+    public enum Space { Granite, Rock, Room, Wall, Path, Door }
 }

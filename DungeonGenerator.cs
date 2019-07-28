@@ -14,21 +14,31 @@ namespace Dungeon_Generator
 
         public void CorridorWalk(Dungeon dungeon, Tile door)
         {
-            List<Tile.Compass> MakeDirections(Tile.Compass lastDirection)
+            HashSet<Tile> visited = new HashSet<Tile>();
+            Stack<CorridorTile> path = new Stack<CorridorTile>();
+            Tile headTile = dungeon.GetTileByDirection(door);
+            CorridorTile head = new CorridorTile(headTile, null, door.Direction);
+            path.Push(head);
+            visited.Add(head.Tile);
+        }
+
+        public void OldCorridorWalk(Dungeon dungeon, Tile door)
+        {
+            List<Direction> MakeDirections(Direction lastDirection)
             {
-                List<Tile.Compass> directions = new List<Tile.Compass>();
-                directions.Add(Tile.Compass.Up);
-                directions.Add(Tile.Compass.Down);
-                directions.Add(Tile.Compass.Left);
-                directions.Add(Tile.Compass.Right);
+                List<Direction> directions = new List<Direction>();
+                directions.Add(Direction.Up);
+                directions.Add(Direction.Down);
+                directions.Add(Direction.Left);
+                directions.Add(Direction.Right);
                 directions.Remove(Tile.Invert(lastDirection));
                 return directions;
             }
 
             int initialCapacity = 128;
             Dictionary<Tile, Tile> from = new Dictionary<Tile, Tile>(initialCapacity);
-            Dictionary<Tile, List<Tile.Compass>> directionsToTry
-                = new Dictionary<Tile, List<Tile.Compass>>(initialCapacity);
+            Dictionary<Tile, List<Direction>> directionsToTry
+                = new Dictionary<Tile, List<Direction>>(initialCapacity);
             HashSet<Tile> visited = new HashSet<Tile>(initialCapacity);
             Stack<Tile> path = new Stack<Tile>(initialCapacity);
 
@@ -40,8 +50,8 @@ namespace Dungeon_Generator
             while (path.Count > 0)
             {
                 head = path.Peek();
-                if (dungeon.IsTileConnectedTo(head, Tile.Type.Path, from[head])
-                    || dungeon.IsTileConnectedTo(head, Tile.Type.Door, from[head]))
+                if (dungeon.IsTileConnectedTo(head, Space.Path, from[head])
+                    || dungeon.IsTileConnectedTo(head, Space.Door, from[head]))
                 {
                     // finalize path and exit
                 }
@@ -55,32 +65,32 @@ namespace Dungeon_Generator
             Tile startOfPath = dungeon.GetTileByDirection(door, door.Direction);
 
             // If tile outside of door is already an end target, there is nothing to do
-            if (startOfPath.Space == Tile.Type.Path || startOfPath.Space == Tile.Type.Door
-                || startOfPath.Space == Tile.Type.Room)
+            if (startOfPath.Space == Space.Path || startOfPath.Space == Space.Door
+                || startOfPath.Space == Space.Room)
             {
                 return;
             }
 
             // If the door has opened into a wall, carve straight ahead until the room can be entered
-            if (startOfPath.Space == Tile.Type.Wall)
+            if (startOfPath.Space == Space.Wall)
             {
                 Tile current = startOfPath;
                 Tile previous = door;
-                while (!dungeon.IsTileConnectedTo(current, Tile.Type.Room)
-                    && !dungeon.IsTileConnectedTo(current, Tile.Type.Door, previous))   // don't count door we came from
+                while (!dungeon.IsTileConnectedTo(current, Space.Room)
+                    && !dungeon.IsTileConnectedTo(current, Space.Door, previous))   // don't count door we came from
                 {
-                    current.Space = Tile.Type.Path;
+                    current.Space = Space.Path;
                     previous = current;
                     current = dungeon.GetTileByDirection(current, door.Direction);
                 }
-                current.Space = Tile.Type.Path;
+                current.Space = Space.Path;
             }
 
             // If there is solid stone ahead, start a path
 
-            /*if (dungeon.IsTileConnectedTo(door, Tile.Type.Path)
-                || dungeon.IsTileConnectedTo(door, Tile.Type.Door)
-                || dungeon.IsTileConnectedTo(door, Tile.Type.Room, dungeon.GetTileByDirection(door, Tile.Invert(door.Direction))))
+            /*if (dungeon.IsTileConnectedTo(door, Space.Path)
+                || dungeon.IsTileConnectedTo(door, Space.Door)
+                || dungeon.IsTileConnectedTo(door, Space.Room, dungeon.GetTileByDirection(door, Tile.Invert(door.Direction))))
             {
 
             }*/

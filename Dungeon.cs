@@ -13,7 +13,7 @@ namespace Dungeon_Generator
         public Tile[,] Tiles { get; private set; }
         public List<Room> Rooms { get; private set; }
 
-        public bool IsTileConnectedTo(Tile tile, Tile.Type otherType, Tile from=null)
+        public bool IsTileConnectedTo(Tile tile, Space otherType, Tile from=null)
         {
             List<Tile> adjacent = new List<Tile>();
             adjacent.Add(GetTile(tile.Row - 1, tile.Col));
@@ -39,25 +39,25 @@ namespace Dungeon_Generator
             return GetTileByDirection(tile, tile.Direction);
         }
 
-        public Tile GetTileByDirection(Tile tile, Tile.Compass direction)
+        public Tile GetTileByDirection(Tile tile, Direction direction)
         {
-            if (direction == Tile.Compass.None)
+            if (direction == Direction.None)
             {
                 throw new ArgumentNullException("direction", "Direction of tile not set");
             }
-            if (direction == Tile.Compass.Up)
+            if (direction == Direction.Up)
             {
                 return Tiles[tile.Row - 1, tile.Col];
             }
-            else if (direction == Tile.Compass.Down)
+            else if (direction == Direction.Down)
             {
                 return Tiles[tile.Row + 1, tile.Col];
             }
-            else if (direction == Tile.Compass.Left)
+            else if (direction == Direction.Left)
             {
                 return Tiles[tile.Row, tile.Col - 1];
             }
-            else //if (direction == Tile.Compass.Right)
+            else //if (direction == Direction.Right)
             {
                 return Tiles[tile.Row, tile.Col + 1];
             }
@@ -72,13 +72,13 @@ namespace Dungeon_Generator
         {
             foreach (Tile tile in room.Doors)
             {
-                tile.Space = Tile.Type.Door;
+                tile.Space = Space.Door;
                 // BELOW IS TEMPORARY
-                //GetTileByDirection(tile).Space = Tile.Type.Path;
+                //GetTileByDirection(tile).Space = Space.Path;
             }
         }
 
-        private void CarveRoomHelper(Room room, Tile.Type material)
+        private void CarveRoomHelper(Room room, Space material)
         {
             int rowToStop = room.FirstRow + room.Height;
             int colToStop = room.FirstCol + room.Width;
@@ -93,8 +93,8 @@ namespace Dungeon_Generator
 
         public void CarveRoom(Room room)
         {
-            CarveRoomHelper(room.Outer, Tile.Type.Wall);
-            CarveRoomHelper(room, Tile.Type.Room);
+            CarveRoomHelper(room.Outer, Space.Wall);
+            CarveRoomHelper(room, Space.Room);
             Rooms.Add(room);
         }
 
@@ -108,13 +108,13 @@ namespace Dungeon_Generator
             // impervious granite edge of the dungeon
             for (int row = 0; row < Height; row++)
             {
-                Tiles[row, 0] = new Tile(row, 0, Tile.Type.Granite);
-                Tiles[row, Width-1] = new Tile(row, Width-1, Tile.Type.Granite);
+                Tiles[row, 0] = new Tile(row, 0, Space.Granite);
+                Tiles[row, Width-1] = new Tile(row, Width-1, Space.Granite);
             }
             for (int col = 0; col < Width; col++)
             {
-                Tiles[0, col] = new Tile(0, col, Tile.Type.Granite);
-                Tiles[Height-1, col] = new Tile(Height-1, col, Tile.Type.Granite);
+                Tiles[0, col] = new Tile(0, col, Space.Granite);
+                Tiles[Height-1, col] = new Tile(Height-1, col, Space.Granite);
             }
 
             // rock interior
@@ -122,7 +122,7 @@ namespace Dungeon_Generator
             {
                 for (int col = 1; col < Width-1; col++)
                 {
-                    Tiles[row, col] = new Tile(row, col, Tile.Type.Rock);
+                    Tiles[row, col] = new Tile(row, col, Space.Rock);
                 }
             }
         }
