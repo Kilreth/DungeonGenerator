@@ -12,27 +12,37 @@ namespace Dungeon_Generator
         public Dungeon Dungeon { get; }
         public static Random Rng { get; }
 
-        public bool IsTileConnected(Dungeon dungeon, Tile tile, Tile from)
-        {
-            List<Tile> adjacent = new List<Tile>();
-            adjacent.Add(dungeon.GetTile(tile.Row - 1, tile.Col));
-            adjacent.Add(dungeon.GetTile(tile.Row + 1, tile.Col));
-            adjacent.Add(dungeon.GetTile(tile.Row, tile.Col - 1));
-            adjacent.Add(dungeon.GetTile(tile.Row, tile.Col + 1));
-            adjacent.Remove(from);
-            foreach (Tile adjacentTile in adjacent)
-            {
-                if (adjacentTile.Space == Tile.Type.Path || adjacentTile.Space == Tile.Type.Wall)
-                {
-                    return true;
-                }
-            }
-            return false;
-        }
-
         public void GenerateCorridor(Dungeon dungeon, Tile door)
         {
+            Tile startOfPath = dungeon.GetTileByDirection(door, door.Direction);
+            // If tile outside of door is already an end target, there is nothing to do
+            if (startOfPath.Space == Tile.Type.Path || startOfPath.Space == Tile.Type.Door
+                || startOfPath.Space == Tile.Type.Room)
+            {
+                return;
+            }
 
+            // If the door has opened into a wall, carve straight ahead until the room can be entered
+            if (startOfPath.Space == Tile.Type.Wall)
+            {
+                Tile current = startOfPath;
+                Tile previous = door;
+                while (!dungeon.IsTileConnectedTo(current, Tile.Type.Room)
+                    && !dungeon.IsTileConnectedTo(current, Tile.Type.Door, previous))   // don't count door we came from
+                {
+                    current.Space = Tile.Type.Path;
+                    previous = current;
+                    current = dungeon.GetTileByDirection(current, current.Direction);
+                }
+                current.Space = Tile.Type.Path;
+            }
+
+            /*if (dungeon.IsTileConnectedTo(door, Tile.Type.Path)
+                || dungeon.IsTileConnectedTo(door, Tile.Type.Door)
+                || dungeon.IsTileConnectedTo(door, Tile.Type.Room, dungeon.GetTileByDirection(door, Tile.Invert(door.Direction))))
+            {
+
+            }*/
         }
 
         public void GenerateCorridors(Dungeon dungeon, double turnChance)
@@ -102,6 +112,7 @@ namespace Dungeon_Generator
             Dungeon = new Dungeon(height, width);
             GenerateRooms(Dungeon, 0.9, 3, 3, 9, 9);
             GenerateDoors(Dungeon, 0.1);
+            GenerateCorridors(Dungeon, 0.7);
         }
 
         static DungeonGenerator()

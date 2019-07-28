@@ -13,6 +13,27 @@ namespace Dungeon_Generator
         public Tile[,] Tiles { get; private set; }
         public List<Room> Rooms { get; private set; }
 
+        public bool IsTileConnectedTo(Tile tile, Tile.Type otherType, Tile from=null)
+        {
+            List<Tile> adjacent = new List<Tile>();
+            adjacent.Add(GetTile(tile.Row - 1, tile.Col));
+            adjacent.Add(GetTile(tile.Row + 1, tile.Col));
+            adjacent.Add(GetTile(tile.Row, tile.Col - 1));
+            adjacent.Add(GetTile(tile.Row, tile.Col + 1));
+            if (from != null)
+            {
+                adjacent.Remove(from);
+            }
+            foreach (Tile adjacentTile in adjacent)
+            {
+                if (adjacentTile.Space == otherType)
+                {
+                    return true;
+                }
+            }
+            return false;
+        }
+
         public Tile GetTileByDirection(Tile tile)
         {
             return GetTileByDirection(tile, tile.Direction);
@@ -47,9 +68,9 @@ namespace Dungeon_Generator
         {
             foreach (Tile tile in room.Doors)
             {
-                tile.Space = Tile.Type.Path;
+                tile.Space = Tile.Type.Door;
                 // BELOW IS TEMPORARY
-                GetTileByDirection(tile).Space = Tile.Type.Path;
+                //GetTileByDirection(tile).Space = Tile.Type.Path;
             }
         }
 

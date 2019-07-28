@@ -27,11 +27,12 @@ namespace Dungeon_Generator
         {
             Graphics graphics = CreateGraphics();
             Brush edgeBrush = new SolidBrush(Color.Black);
-            Brush graniteBrush = new SolidBrush(Color.Brown);
+            Brush graniteBrush = new SolidBrush(Color.Green);
             Brush rockBrush = new SolidBrush(Color.Gray);
             Brush wallBrush = new SolidBrush(Color.DarkRed);
             Brush pathBrush = new SolidBrush(Color.DarkBlue);
             Brush roomBrush = new SolidBrush(Color.LightGray);
+            Brush doorBrush = new SolidBrush(Color.Brown);
             Brush brush = null;
 
             Tile[,] tiles = dungeon.Tiles;
@@ -50,6 +51,10 @@ namespace Dungeon_Generator
                     else if (tiles[row, col].Space == Tile.Type.Room)
                     {
                         brush = roomBrush;
+                    }
+                    else if (tiles[row, col].Space == Tile.Type.Door)
+                    {
+                        brush = doorBrush;
                     }
                     else if (tiles[row, col].Space == Tile.Type.Wall)
                     {
