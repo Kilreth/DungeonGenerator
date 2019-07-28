@@ -14,14 +14,14 @@ namespace Dungeon_Generator
         public List<Direction> DirectionsToTry { get; }
         public Space Space { get { return Tile.Space; } }
 
-        public CorridorTile TryNextTile(Dungeon dungeon, float chanceToTurn)
+        public CorridorTile ChooseNextTile(Dungeon dungeon, double chanceToTurn)
         {
             Direction nextDirection = ChooseNextDirection(chanceToTurn);
             Tile nextTile = dungeon.GetTileByDirection(Tile, nextDirection);
             return new CorridorTile(nextTile, this, nextDirection);
         }
 
-        public Direction ChooseNextDirection(float chanceToTurn)
+        public Direction ChooseNextDirection(double chanceToTurn)
         {
             if (DirectionsToTry.Count == 0)
             {
@@ -41,6 +41,24 @@ namespace Dungeon_Generator
             Direction direction = DirectionsToTry[index];
             DirectionsToTry.RemoveAt(index);
             return direction;
+        }
+
+        public override bool Equals(object obj)
+        {
+            if ((obj == null) || !this.GetType().Equals(obj.GetType()))
+            {
+                return false;
+            }
+            else
+            {
+                CorridorTile other = (CorridorTile) obj;
+                return other == obj;
+            }
+        }
+
+        public override int GetHashCode()
+        {
+            return Tile.GetHashCode();
         }
 
         public CorridorTile(Tile tile, CorridorTile from, Direction dir)

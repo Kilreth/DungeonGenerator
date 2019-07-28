@@ -28,6 +28,24 @@ namespace Dungeon_Generator
                 return Direction.Left;
         }
 
+        public override bool Equals(object obj)
+        {
+            if ((obj == null) || !this.GetType().Equals(obj.GetType()))
+            {
+                return false;
+            }
+            else
+            {
+                Tile other = (Tile) obj;
+                return (Row == other.Row) && (Col == other.Col);
+            }
+        }
+
+        public override int GetHashCode()
+        {
+            return (Row << 2) ^ Col;
+        }
+
         public Tile(int row, int col, Space space)
         {
             Row = row;
