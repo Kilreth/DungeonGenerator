@@ -12,6 +12,7 @@ namespace Dungeon_Generator
         public int Col { get; }
         public Type Space { get; set; }
         public Compass Direction { get; set; }
+        public Tile From { get; set; }
 
         /// <summary>
         /// Up:    Decreasing rows

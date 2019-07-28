@@ -12,9 +12,48 @@ namespace Dungeon_Generator
         public Dungeon Dungeon { get; }
         public static Random Rng { get; }
 
+        public void CorridorWalk(Dungeon dungeon, Tile door)
+        {
+            List<Tile.Compass> MakeDirections(Tile.Compass lastDirection)
+            {
+                List<Tile.Compass> directions = new List<Tile.Compass>();
+                directions.Add(Tile.Compass.Up);
+                directions.Add(Tile.Compass.Down);
+                directions.Add(Tile.Compass.Left);
+                directions.Add(Tile.Compass.Right);
+                directions.Remove(Tile.Invert(lastDirection));
+                return directions;
+            }
+
+            int initialCapacity = 128;
+            Dictionary<Tile, Tile> from = new Dictionary<Tile, Tile>(initialCapacity);
+            Dictionary<Tile, List<Tile.Compass>> directionsToTry
+                = new Dictionary<Tile, List<Tile.Compass>>(initialCapacity);
+            HashSet<Tile> visited = new HashSet<Tile>(initialCapacity);
+            Stack<Tile> path = new Stack<Tile>(initialCapacity);
+
+            Tile head = dungeon.GetTileByDirection(door);
+            path.Push(head);
+            visited.Add(head);
+            from.Add(head, door);
+            directionsToTry.Add(head, MakeDirections(door.Direction));
+            while (path.Count > 0)
+            {
+                head = path.Peek();
+                if (dungeon.IsTileConnectedTo(head, Tile.Type.Path, from[head])
+                    || dungeon.IsTileConnectedTo(head, Tile.Type.Door, from[head]))
+                {
+                    // finalize path and exit
+                }
+
+                //if (directionsToTry[from[head].Direction)
+            }
+        }
+
         public void GenerateCorridor(Dungeon dungeon, Tile door)
         {
             Tile startOfPath = dungeon.GetTileByDirection(door, door.Direction);
+
             // If tile outside of door is already an end target, there is nothing to do
             if (startOfPath.Space == Tile.Type.Path || startOfPath.Space == Tile.Type.Door
                 || startOfPath.Space == Tile.Type.Room)
@@ -36,6 +75,8 @@ namespace Dungeon_Generator
                 }
                 current.Space = Tile.Type.Path;
             }
+
+            // If there is solid stone ahead, start a path
 
             /*if (dungeon.IsTileConnectedTo(door, Tile.Type.Path)
                 || dungeon.IsTileConnectedTo(door, Tile.Type.Door)
