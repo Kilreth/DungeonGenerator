@@ -32,7 +32,7 @@ namespace Dungeon_Generator
                 {
                     current.Space = Tile.Type.Path;
                     previous = current;
-                    current = dungeon.GetTileByDirection(current, current.Direction);
+                    current = dungeon.GetTileByDirection(current, door.Direction);
                 }
                 current.Space = Tile.Type.Path;
             }

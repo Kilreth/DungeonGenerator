@@ -27,12 +27,12 @@ namespace Dungeon_Generator
         {
             Graphics graphics = CreateGraphics();
             Brush edgeBrush = new SolidBrush(Color.Black);
-            Brush graniteBrush = new SolidBrush(Color.Green);
+            Brush graniteBrush = new SolidBrush(Color.DarkViolet);
             Brush rockBrush = new SolidBrush(Color.Gray);
             Brush wallBrush = new SolidBrush(Color.DarkRed);
             Brush pathBrush = new SolidBrush(Color.DarkBlue);
             Brush roomBrush = new SolidBrush(Color.LightGray);
-            Brush doorBrush = new SolidBrush(Color.Brown);
+            Brush doorBrush = new SolidBrush(Color.Orange);
             Brush brush = null;
 
             Tile[,] tiles = dungeon.Tiles;

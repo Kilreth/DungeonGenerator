@@ -19,7 +19,7 @@ namespace Dungeon_Generator
         /// Left:  Decreasing columns
         /// Right: Increasing columns
         /// </summary>
-        public enum Compass { Up, Down, Left, Right }
+        public enum Compass { None, Up, Down, Left, Right }
 
         /// <summary>
         /// Granite: Impervious edge of the dungeon
@@ -33,6 +33,8 @@ namespace Dungeon_Generator
 
         public static Compass Invert(Compass direction)
         {
+            if (direction == Compass.None)
+                throw new ArgumentNullException("direction", "Direction of tile not set");
             if (direction == Compass.Up)
                 return Compass.Down;
             else if (direction == Compass.Down)

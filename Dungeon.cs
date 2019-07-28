@@ -41,6 +41,10 @@ namespace Dungeon_Generator
 
         public Tile GetTileByDirection(Tile tile, Tile.Compass direction)
         {
+            if (direction == Tile.Compass.None)
+            {
+                throw new ArgumentNullException("direction", "Direction of tile not set");
+            }
             if (direction == Tile.Compass.Up)
             {
                 return Tiles[tile.Row - 1, tile.Col];
