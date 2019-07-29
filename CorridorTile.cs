@@ -52,7 +52,7 @@ namespace Dungeon_Generator
             else
             {
                 CorridorTile other = (CorridorTile) obj;
-                return other == obj;
+                return Tile == other.Tile;
             }
         }
 

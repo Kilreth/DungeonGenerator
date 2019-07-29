@@ -30,7 +30,7 @@ namespace Dungeon_Generator
             Brush graniteBrush = new SolidBrush(Color.DarkViolet);
             Brush rockBrush = new SolidBrush(Color.Gray);
             Brush wallBrush = new SolidBrush(Color.DarkRed);
-            Brush pathBrush = new SolidBrush(Color.DarkBlue);
+            Brush pathBrush = new SolidBrush(Color.Yellow);
             Brush roomBrush = new SolidBrush(Color.LightGray);
             Brush doorBrush = new SolidBrush(Color.Orange);
             Brush brush = null;
@@ -67,7 +67,7 @@ namespace Dungeon_Generator
                     graphics.FillRectangle(edgeBrush, new Rectangle(
                             startX + col * tileSize, startY + row * tileSize, tileSize, tileSize));
                     graphics.FillRectangle(brush, new Rectangle(
-                            startX + 1 + col * tileSize, startY + 1 + row * tileSize, tileSize - 2, tileSize - 2));
+                            startX + col * tileSize, startY + row * tileSize, tileSize, tileSize));
                 }
             }
         }

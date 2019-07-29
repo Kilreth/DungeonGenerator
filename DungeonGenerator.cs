@@ -14,14 +14,14 @@ namespace Dungeon_Generator
 
         public void CorridorWalk(Dungeon dungeon, Tile door, double chanceToTurn)
         {
-            HashSet<Tile> visited = new HashSet<Tile>();
+            HashSet<CorridorTile> visited = new HashSet<CorridorTile>();
             Stack<CorridorTile> path = new Stack<CorridorTile>();
 
             Tile headTile = dungeon.GetTileByDirection(door);
-            CorridorTile tail = new CorridorTile(door, null, door.Direction);
-            CorridorTile head = new CorridorTile(headTile, tail, door.Direction);
+            CorridorTile start = new CorridorTile(door, null, door.Direction);
+            CorridorTile head = new CorridorTile(headTile, start, door.Direction);
             path.Push(head);
-            visited.Add(head.Tile);
+            visited.Add(head);
             while (path.Count > 0)
             {
                 head = path.Peek();
@@ -41,6 +41,7 @@ namespace Dungeon_Generator
                     {
                         path.Pop().Tile.Space = Space.Path;
                     }
+                    break;
                 }
 
                 if (head.DirectionsToTry.Count > 0)
@@ -49,14 +50,15 @@ namespace Dungeon_Generator
                     do
                     {
                         next = head.ChooseNextTile(dungeon, chanceToTurn);
-                    } while (visited.Contains(next.Tile) && head.DirectionsToTry.Count > 0);
-                    if (next == null)
+                    } while (visited.Contains(next) && head.DirectionsToTry.Count > 0);
+                    if (visited.Contains(next))
                     {
                         path.Pop();
                     }
                     else
                     {
                         path.Push(next);
+                        visited.Add(next);
                     }
                 }
                 else
@@ -66,49 +68,12 @@ namespace Dungeon_Generator
             }
         }
 
-        public void OldCorridorWalk(Dungeon dungeon, Tile door)
-        {
-            List<Direction> MakeDirections(Direction lastDirection)
-            {
-                List<Direction> directions = new List<Direction>();
-                directions.Add(Direction.Up);
-                directions.Add(Direction.Down);
-                directions.Add(Direction.Left);
-                directions.Add(Direction.Right);
-                directions.Remove(Tile.Invert(lastDirection));
-                return directions;
-            }
-
-            int initialCapacity = 128;
-            Dictionary<Tile, Tile> from = new Dictionary<Tile, Tile>(initialCapacity);
-            Dictionary<Tile, List<Direction>> directionsToTry
-                = new Dictionary<Tile, List<Direction>>(initialCapacity);
-            HashSet<Tile> visited = new HashSet<Tile>(initialCapacity);
-            Stack<Tile> path = new Stack<Tile>(initialCapacity);
-
-            Tile head = dungeon.GetTileByDirection(door);
-            path.Push(head);
-            visited.Add(head);
-            from.Add(head, door);
-            directionsToTry.Add(head, MakeDirections(door.Direction));
-            while (path.Count > 0)
-            {
-                head = path.Peek();
-                if (dungeon.IsTileConnectedTo(head, Space.Path, from[head])
-                    || dungeon.IsTileConnectedTo(head, Space.Door, from[head]))
-                {
-                    // finalize path and exit
-                }
-
-                //if (directionsToTry[from[head].Direction)
-            }
-        }
-
         public void GenerateCorridor(Dungeon dungeon, Tile door, double chanceToTurn)
         {
             Tile startOfPath = dungeon.GetTileByDirection(door, door.Direction);
 
             // If tile outside of door is already an end target, there is nothing to do
+
             if (startOfPath.Space == Space.Path || startOfPath.Space == Space.Door
                 || startOfPath.Space == Space.Room)
             {
@@ -116,6 +81,7 @@ namespace Dungeon_Generator
             }
 
             // If the door has opened into a wall, carve straight ahead until the room can be entered
+
             if (startOfPath.Space == Space.Wall)
             {
                 Tile current = startOfPath;
@@ -128,17 +94,12 @@ namespace Dungeon_Generator
                     current = dungeon.GetTileByDirection(current, door.Direction);
                 }
                 current.Space = Space.Path;
+                return;
             }
 
             // If there is solid stone ahead, start a path
 
             CorridorWalk(dungeon, door, chanceToTurn);
-            /*if (dungeon.IsTileConnectedTo(door, Space.Path)
-                || dungeon.IsTileConnectedTo(door, Space.Door)
-                || dungeon.IsTileConnectedTo(door, Space.Room, dungeon.GetTileByDirection(door, Tile.Invert(door.Direction))))
-            {
-
-            }*/
         }
 
         public void GenerateCorridors(Dungeon dungeon, double chanceToTurn)
@@ -208,7 +169,7 @@ namespace Dungeon_Generator
             Dungeon = new Dungeon(height, width);
             GenerateRooms(Dungeon, 0.9, 3, 3, 9, 9);
             GenerateDoors(Dungeon, 0.1);
-            GenerateCorridors(Dungeon, 0.7);
+            GenerateCorridors(Dungeon, 0.2);
         }
 
         static DungeonGenerator()
