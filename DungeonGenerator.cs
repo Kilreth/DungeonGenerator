@@ -27,15 +27,19 @@ namespace Dungeon_Generator
                 head = path.Peek();
 
                 // Can we carve this tile?
-                if (head.Space == Space.Wall || head.Space == Space.Granite)
+
+                // If a door is on the head of the stack, it belongs to the room we came from.
+                // Treat those doors as walls.
+                if (head.Space == Space.Wall || head.Space == Space.Granite || head.Space == Space.Door)
                 {
                     path.Pop();
                     continue;
                 }
 
                 // Have we found a door, or an existing path?
-                if (dungeon.IsTileConnectedTo(head.Tile, Space.Path, head.From.Tile)
-                    || dungeon.IsTileConnectedTo(head.Tile, Space.Door, head.From.Tile))
+                if (dungeon.IsTileAdjacentTo(head.Tile, Space.Path, head.From.Tile)
+                    || (dungeon.IsTileAdjacentTo(head.Tile, Space.Door, head.From.Tile)
+                        && dungeon.GetAdjacentTilesOfType(head.Tile, Space.Door, head.From.Tile)[0].Room.Id != door.Room.Id))
                 {
                     while (path.Count > 0)
                     {
@@ -86,8 +90,8 @@ namespace Dungeon_Generator
             {
                 Tile current = startOfPath;
                 Tile previous = door;
-                while (!dungeon.IsTileConnectedTo(current, Space.Room)
-                    && !dungeon.IsTileConnectedTo(current, Space.Door, previous))   // don't count door we came from
+                while (!dungeon.IsTileAdjacentTo(current, Space.Room)
+                    && !dungeon.IsTileAdjacentTo(current, Space.Door, previous))   // don't count door we came from
                 {
                     current.Space = Space.Path;
                     previous = current;
@@ -124,8 +128,6 @@ namespace Dungeon_Generator
         public void GenerateRooms(Dungeon dungeon, double roomToDungeonRatio,
                                      int minRoomHeight, int minRoomWidth, int maxRoomHeight, int maxRoomWidth)
         {
-            List<Room> rooms = new List<Room>();
-
             // calculate how many room tiles we have
             int totalTiles = dungeon.Height * dungeon.Width;
             int remainingRoomTiles = (int) (totalTiles * roomToDungeonRatio);
@@ -151,7 +153,7 @@ namespace Dungeon_Generator
                 {
                     row = Rng.Next(dungeonEdge, dungeon.Height - roomHeight - dungeonEdge + 1);
                     col = Rng.Next(dungeonEdge, dungeon.Width - roomWidth - dungeonEdge + 1);
-                    room.Replace(row, col, roomHeight, roomWidth);
+                    room.Replace(row, col, roomHeight, roomWidth, dungeon.Rooms.Count);
                     ++attempts;
                 } while (!room.CanRoomFit(dungeon) && attempts != 100);
                 if (attempts == 100)

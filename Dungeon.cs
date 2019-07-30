@@ -13,25 +13,30 @@ namespace Dungeon_Generator
         public Tile[,] Tiles { get; private set; }
         public List<Room> Rooms { get; private set; }
 
-        public bool IsTileConnectedTo(Tile tile, Space otherType, Tile from=null)
+        public bool IsTileAdjacentTo(Tile tile, Space otherType, Tile from=null)
         {
-            List<Tile> adjacent = new List<Tile>();
-            adjacent.Add(GetTile(tile.Row - 1, tile.Col));
-            adjacent.Add(GetTile(tile.Row + 1, tile.Col));
-            adjacent.Add(GetTile(tile.Row, tile.Col - 1));
-            adjacent.Add(GetTile(tile.Row, tile.Col + 1));
-            if (from != null)
+            return GetAdjacentTilesOfType(tile, otherType, from).Count > 0;
+        }
+
+        public List<Tile> GetAdjacentTilesOfType(Tile tile, Space otherType, Tile from=null)
+        {
+            List<Tile> adjacents = new List<Tile>();
+            adjacents.Add(GetTile(tile.Row - 1, tile.Col));
+            adjacents.Add(GetTile(tile.Row + 1, tile.Col));
+            adjacents.Add(GetTile(tile.Row, tile.Col - 1));
+            adjacents.Add(GetTile(tile.Row, tile.Col + 1));
+            for (int i = 3; i >= 0; --i)
             {
-                adjacent.Remove(from);
-            }
-            foreach (Tile adjacentTile in adjacent)
-            {
-                if (adjacentTile.Space == otherType)
+                if (adjacents[i].Space != otherType)
                 {
-                    return true;
+                    adjacents.RemoveAt(i);
                 }
             }
-            return false;
+            if (from != null)
+            {
+                adjacents.Remove(from);
+            }
+            return adjacents;
         }
 
         public Tile GetTileByDirection(Tile tile)

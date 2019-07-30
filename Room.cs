@@ -16,6 +16,7 @@ namespace Dungeon_Generator
         public int FirstCol { get; private set; }
         public int Height { get; private set; }
         public int Width { get; private set; }
+        public int Id { get; private set; }
         public int NumTiles { get; private set; }
 
         public Room Outer { get; private set; }
@@ -70,10 +71,11 @@ namespace Dungeon_Generator
             while (Doors.Count < numDoors)
             {
                 door = walls[DungeonGenerator.Rng.Next(0, walls.Count)];
-                if (!Doors.Contains(door) && !dungeon.IsTileConnectedTo(door, Space.Door))
+                if (!Doors.Contains(door) && !dungeon.IsTileAdjacentTo(door, Space.Door))
                 {
                     Doors.Add(door);
                     door.Space = Space.Door;
+                    door.Room = this;
                 }
             }
         }
@@ -120,12 +122,13 @@ namespace Dungeon_Generator
             }
         }
 
-        private void Initialise(int firstRow, int firstCol, int height, int width)
+        private void Initialise(int firstRow, int firstCol, int height, int width, int id)
         {
             FirstRow = firstRow;
             FirstCol = firstCol;
             Height = height;
             Width = width;
+            Id = id;
             SetNumTiles();
 
             Outer = null;
@@ -133,14 +136,14 @@ namespace Dungeon_Generator
             walls = null;
         }
 
-        public void Replace(int firstRow, int firstCol, int height, int width)
+        public void Replace(int firstRow, int firstCol, int height, int width, int id=-1)
         {
-            Initialise(firstRow, firstCol, height, width);
+            Initialise(firstRow, firstCol, height, width, id);
         }
 
-        public Room(int firstRow, int firstCol, int height, int width)
+        public Room(int firstRow, int firstCol, int height, int width, int id=-1)
         {
-            Initialise(firstRow, firstCol, height, width);
+            Initialise(firstRow, firstCol, height, width, id);
         }
     }
 }
