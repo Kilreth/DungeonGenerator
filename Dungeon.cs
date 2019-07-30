@@ -68,16 +68,6 @@ namespace Dungeon_Generator
             return Tiles[row, col];
         }
 
-        public void CarveRoomDoors(Room room)
-        {
-            foreach (Tile tile in room.Doors)
-            {
-                tile.Space = Space.Door;
-                // BELOW IS TEMPORARY
-                //GetTileByDirection(tile).Space = Space.Path;
-            }
-        }
-
         private void CarveRoomHelper(Room room, Space material)
         {
             int rowToStop = room.FirstRow + room.Height;

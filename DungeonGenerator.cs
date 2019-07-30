@@ -118,7 +118,6 @@ namespace Dungeon_Generator
             foreach (Room room in dungeon.Rooms)
             {
                 room.GenerateDoors(dungeon, doorToWallRatio);
-                dungeon.CarveRoomDoors(room);
             }
         }
 

@@ -66,12 +66,14 @@ namespace Dungeon_Generator
             }
 
             Doors = new List<Tile>();
+            Tile door;
             while (Doors.Count < numDoors)
             {
-                int index = DungeonGenerator.Rng.Next(0, walls.Count);
-                if (!Doors.Contains(walls[index]))
+                door = walls[DungeonGenerator.Rng.Next(0, walls.Count)];
+                if (!Doors.Contains(door) && !dungeon.IsTileConnectedTo(door, Space.Door))
                 {
-                    Doors.Add(walls[index]);
+                    Doors.Add(door);
+                    door.Space = Space.Door;
                 }
             }
         }
