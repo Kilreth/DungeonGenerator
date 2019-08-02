@@ -6,6 +6,9 @@ using System.Threading.Tasks;
 
 namespace Dungeon_Generator
 {
+    /// <summary>
+    /// A CorridorTile wraps around a Tile and is used in iterative path finding.
+    /// </summary>
     public class CorridorTile
     {
         public Tile Tile { get; }

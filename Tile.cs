@@ -24,8 +24,9 @@ namespace Dungeon_Generator
                 return Direction.Up;
             else if (direction == Direction.Left)
                 return Direction.Right;
-            else //if (direction == Compass.Right)
+            else if (direction == Direction.Right)
                 return Direction.Left;
+            throw new ArgumentNullException("direction", "Invert undefined for this direction");
         }
 
         public override bool Equals(object obj)

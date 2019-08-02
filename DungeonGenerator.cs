@@ -30,6 +30,7 @@ namespace Dungeon_Generator
 
                 // If a door is on the head of the stack, it belongs to the room we came from.
                 // Treat those doors as walls.
+
                 if (head.Space == Space.Wall || head.Space == Space.Granite || head.Space == Space.Door)
                 {
                     path.Pop();
@@ -37,6 +38,7 @@ namespace Dungeon_Generator
                 }
 
                 // Have we found a door, or an existing path?
+
                 if (dungeon.IsTileAdjacentTo(head.Tile, Space.Path, head.From.Tile)
                     || (dungeon.IsTileAdjacentTo(head.Tile, Space.Door, head.From.Tile)
                         && dungeon.GetAdjacentTilesOfType(head.Tile, Space.Door, head.From.Tile)[0].Room.Id != door.Room.Id))
@@ -47,6 +49,8 @@ namespace Dungeon_Generator
                     }
                     break;
                 }
+
+                // Decide where to go next, or step back one tile if all paths have been explored
 
                 if (head.DirectionsToTry.Count > 0)
                 {
@@ -84,7 +88,8 @@ namespace Dungeon_Generator
                 return;
             }
 
-            // If the door has opened into a wall, carve straight ahead until the room can be entered
+            // If the door has opened into a wall, carve straight ahead until the other room can be entered
+            // Then exit this method call
 
             if (startOfPath.Space == Space.Wall)
             {
@@ -128,14 +133,16 @@ namespace Dungeon_Generator
         public void GenerateRooms(Dungeon dungeon, double roomToDungeonRatio,
                                      int minRoomHeight, int minRoomWidth, int maxRoomHeight, int maxRoomWidth)
         {
-            // calculate how many room tiles we have
+            // Calculate how many room tiles we have
+
             int totalTiles = dungeon.Height * dungeon.Width;
             int remainingRoomTiles = (int) (totalTiles * roomToDungeonRatio);
             int minRoomSize = minRoomHeight * minRoomWidth;
+
             while (remainingRoomTiles > minRoomSize * 3)
             {
-                Debug.WriteLine("go");
-                // generate random dimensions for a room
+                // Generate random dimensions for a room
+
                 int roomHeight, roomWidth;
                 do
                 {
@@ -143,9 +150,9 @@ namespace Dungeon_Generator
                     roomWidth  = Rng.Next(minRoomWidth,  maxRoomWidth  + 1);
                 } while (roomHeight * roomWidth > remainingRoomTiles);
 
-                // create the room and put it in a random place
+                // Create the room and put it in a random place
 
-                Room room = new Room(0, 0, 0, 0);
+                Room room = new Room(0, 0, 0, 0);   // initialized null value
                 int row, col;
                 int dungeonEdge = 3;
                 int attempts = 0;
@@ -160,6 +167,7 @@ namespace Dungeon_Generator
                 {
                     break;
                 }
+
                 dungeon.CarveRoom(room);
                 remainingRoomTiles -= roomHeight * roomWidth;
             }

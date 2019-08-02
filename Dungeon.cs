@@ -52,20 +52,34 @@ namespace Dungeon_Generator
             }
             if (direction == Direction.Up)
             {
-                return Tiles[tile.Row - 1, tile.Col];
+                return GetTile(tile.Row - 1, tile.Col);
             }
             else if (direction == Direction.Down)
             {
-                return Tiles[tile.Row + 1, tile.Col];
+                return GetTile(tile.Row + 1, tile.Col);
             }
             else if (direction == Direction.Left)
             {
-                return Tiles[tile.Row, tile.Col - 1];
+                return GetTile(tile.Row, tile.Col - 1);
             }
-            else //if (direction == Direction.Right)
+            else if (direction == Direction.Right)
             {
-                return Tiles[tile.Row, tile.Col + 1];
+                return GetTile(tile.Row, tile.Col + 1);
             }
+            throw new ArgumentNullException("direction", "Unknown how to use this direction");
+        }
+
+        public bool IsTileWithinDungeon(int row, int col)
+        {
+            if (row < 0 || col < 0)
+            {
+                return false;
+            }
+            if (row >= Height || col >= Width)
+            {
+                return false;
+            }
+            return true;
         }
 
         public Tile GetTile(int row, int col)
@@ -73,7 +87,7 @@ namespace Dungeon_Generator
             return Tiles[row, col];
         }
 
-        private void CarveRoomHelper(Room room, Space material)
+        private void CarveRoomHelper(Room room, Space space)
         {
             int rowToStop = room.FirstRow + room.Height;
             int colToStop = room.FirstCol + room.Width;
@@ -81,7 +95,7 @@ namespace Dungeon_Generator
             {
                 for (int col = room.FirstCol; col < colToStop; col++)
                 {
-                    Tiles[row, col].Space = material;
+                    GetTile(row, col).Space = space;
                 }
             }
         }
@@ -100,7 +114,7 @@ namespace Dungeon_Generator
         {
             Tiles = new Tile[Height, Width];
 
-            // impervious granite edge of the dungeon
+            // Impervious granite edge of the dungeon
             for (int row = 0; row < Height; row++)
             {
                 Tiles[row, 0] = new Tile(row, 0, Space.Granite);
@@ -112,7 +126,7 @@ namespace Dungeon_Generator
                 Tiles[Height-1, col] = new Tile(Height-1, col, Space.Granite);
             }
 
-            // rock interior
+            // Rock interior
             for (int row = 1; row < Height-1; row++)
             {
                 for (int col = 1; col < Width-1; col++)

@@ -8,6 +8,7 @@ namespace Dungeon_Generator
 {
     /// <summary>
     /// A Room represents the vacant tiles in a room.
+    /// A Room may create an Outer room which includes surrounding wall tiles.
     /// </summary>
     public class Room
     {
@@ -27,23 +28,23 @@ namespace Dungeon_Generator
         {
             InitialiseOuter();
 
-            // is origin corner within the dungeon?
-            if (Outer.FirstRow < 0 || Outer.FirstCol < 0)
+            // Is origin corner within the dungeon?
+            if (!dungeon.IsTileWithinDungeon(Outer.FirstRow, Outer.FirstCol))
                 return false;
-            // is far corner within the dungeon?
-            if (Outer.FirstRow + Outer.Height - 1 >= dungeon.Height)
-                return false;
-            if (Outer.FirstCol + Outer.Width - 1 >= dungeon.Width)
+            // Is far corner within the dungeon?
+            if (!dungeon.IsTileWithinDungeon(Outer.FirstRow + Outer.Height - 1,
+                                             Outer.FirstCol + Outer.Width - 1))
                 return false;
 
-            // does the room including outer walls overlap with anything?
+            // Does the room including outer walls overlap with anything?
             int rowToStop = Outer.FirstRow + Outer.Height;
             int colToStop = Outer.FirstCol + Outer.Width;
             for (int row = Outer.FirstRow; row < rowToStop; row++)
             {
                 for (int col = Outer.FirstCol; col < colToStop; col++)
                 {
-                    // Excluding walls here allows walls to be shared by rooms
+                    // Existing room wall tiles are allowed to overlap
+                    // This allows walls to be shared by rooms
                     if (dungeon.GetTile(row, col).Space != Space.Rock
                         && dungeon.GetTile(row, col).Space != Space.Wall)
                     {
@@ -88,7 +89,7 @@ namespace Dungeon_Generator
         {
             InitialiseOuter();
             walls = new List<Tile>();
-            Tile tile = null;
+            Tile tile;
             for (int row = FirstRow; row < FirstRow + Height; row++)
             {
                 tile = dungeon.GetTile(row, Outer.FirstCol);
