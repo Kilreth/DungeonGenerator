@@ -72,7 +72,7 @@ namespace Dungeon_Generator
             while (Doors.Count < numDoors)
             {
                 door = walls[DungeonGenerator.Rng.Next(0, walls.Count)];
-                if (!Doors.Contains(door) && !dungeon.IsTileAdjacentTo(door, Space.Door))
+                if (!Doors.Contains(door) && !dungeon.IsTileSurroundedBy(door, Space.Door))
                 {
                     Doors.Add(door);
                     door.Space = Space.Door;
