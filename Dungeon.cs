@@ -13,30 +13,53 @@ namespace Dungeon_Generator
         public Tile[,] Tiles { get; private set; }
         public List<Room> Rooms { get; private set; }
 
-        public bool IsTileAdjacentTo(Tile tile, Space otherType, Tile from=null)
+        public bool IsTileAdjacentTo(Tile tile, Space otherType, Tile from = null)
         {
             return GetAdjacentTilesOfType(tile, otherType, from).Count > 0;
         }
 
-        public List<Tile> GetAdjacentTilesOfType(Tile tile, Space otherType, Tile from=null)
+        public bool IsTileSurroundedBy(Tile tile, Space otherType, Tile from = null)
         {
-            List<Tile> adjacents = new List<Tile>();
-            adjacents.Add(GetTile(tile.Row - 1, tile.Col));
-            adjacents.Add(GetTile(tile.Row + 1, tile.Col));
-            adjacents.Add(GetTile(tile.Row, tile.Col - 1));
-            adjacents.Add(GetTile(tile.Row, tile.Col + 1));
-            for (int i = 3; i >= 0; --i)
+            return GetSurroundingTilesOfType(tile, otherType, from).Count > 0;
+        }
+
+        public List<Tile> GetAdjacentTilesOfType(Tile tile, Space otherType, Tile from = null)
+        {
+            return GetSurroundingTilesOfTypeImpl(tile, otherType, from, false);
+        }
+
+        public List<Tile> GetSurroundingTilesOfType(Tile tile, Space otherType, Tile from = null)
+        {
+            return GetSurroundingTilesOfTypeImpl(tile, otherType, from, true);
+        }
+
+        private List<Tile> GetSurroundingTilesOfTypeImpl(Tile tile, Space otherType, Tile from, bool includeCorners)
+        {
+            List<Tile> surrounding = new List<Tile>();
+            surrounding.Add(GetTile(tile.Row - 1, tile.Col));
+            surrounding.Add(GetTile(tile.Row + 1, tile.Col));
+            surrounding.Add(GetTile(tile.Row, tile.Col - 1));
+            surrounding.Add(GetTile(tile.Row, tile.Col + 1));
+            if (includeCorners)
             {
-                if (adjacents[i].Space != otherType)
-                {
-                    adjacents.RemoveAt(i);
-                }
+                surrounding.Add(GetTile(tile.Row - 1, tile.Col - 1));
+                surrounding.Add(GetTile(tile.Row - 1, tile.Col + 1));
+                surrounding.Add(GetTile(tile.Row + 1, tile.Col - 1));
+                surrounding.Add(GetTile(tile.Row + 1, tile.Col + 1));
             }
             if (from != null)
             {
-                adjacents.Remove(from);
+                surrounding.Remove(from);
             }
-            return adjacents;
+
+            for (int i = surrounding.Count - 1; i >= 0; --i)
+            {
+                if (surrounding[i].Space != otherType)
+                {
+                    surrounding.RemoveAt(i);
+                }
+            }
+            return surrounding;
         }
 
         public Tile GetTileByDirection(Tile tile)
