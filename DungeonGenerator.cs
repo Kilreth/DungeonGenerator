@@ -168,7 +168,7 @@ namespace Dungeon_Generator
 
                 Room room = new Room(0, 0, 0, 0);   // initialized null value
                 int row, col;
-                int dungeonEdge = 3;
+                int dungeonEdge = 2;
                 int attempts = 0;
                 do
                 {
