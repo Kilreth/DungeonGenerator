@@ -14,6 +14,18 @@ namespace Dungeon_Generator
 
         public void CorridorWalk(Dungeon dungeon, Tile door, double chanceToTurn)
         {
+            bool DoorLeadsToOtherRoom(List<Tile> doors)
+            {
+                foreach (Tile d in doors)
+                {
+                    if (d.Room.Id != door.Room.Id)
+                    {
+                        return true;
+                    }
+                }
+                return false;
+            }
+
             HashSet<CorridorTile> visited = new HashSet<CorridorTile>();
             Stack<CorridorTile> path = new Stack<CorridorTile>();
 
@@ -38,11 +50,13 @@ namespace Dungeon_Generator
                 }
 
                 // Have we found a door, or an existing path?
+                // If looking for a door, verify not all adjacent doors belong to the room we came from
 
                 if (dungeon.IsTileAdjacentTo(head.Tile, Space.Path, head.From.Tile)
                     || (dungeon.IsTileAdjacentTo(head.Tile, Space.Door, head.From.Tile)
-                        && dungeon.GetAdjacentTilesOfType(head.Tile, Space.Door, head.From.Tile)[0].Room.Id != door.Room.Id))
+                        && DoorLeadsToOtherRoom(dungeon.GetAdjacentTilesOfType(head.Tile, Space.Door, head.From.Tile))))
                 {
+                    // Carve the complete path
                     while (path.Count > 0)
                     {
                         path.Pop().Tile.Space = Space.Path;
