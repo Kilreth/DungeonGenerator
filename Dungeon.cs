@@ -25,21 +25,45 @@ namespace Dungeon_Generator
 
         public List<Tile> GetAdjacentTilesOfType(Tile tile, Space otherType, Tile from = null)
         {
-            return GetSurroundingTilesOfTypeImpl(tile, otherType, from, false);
+            return TilesOfType(GetSurroundingTilesImpl(tile, from, false), otherType);
         }
 
         public List<Tile> GetSurroundingTilesOfType(Tile tile, Space otherType, Tile from = null)
         {
-            return GetSurroundingTilesOfTypeImpl(tile, otherType, from, true);
+            return TilesOfType(GetSurroundingTilesImpl(tile, from, true), otherType);
         }
 
-        private List<Tile> GetSurroundingTilesOfTypeImpl(Tile tile, Space otherType, Tile from, bool includeCorners)
+        public List<Tile> GetAdjacentTiles(Tile tile, Tile from = null)
         {
-            List<Tile> surrounding = new List<Tile>();
-            surrounding.Add(GetTile(tile.Row - 1, tile.Col));
-            surrounding.Add(GetTile(tile.Row + 1, tile.Col));
-            surrounding.Add(GetTile(tile.Row, tile.Col - 1));
-            surrounding.Add(GetTile(tile.Row, tile.Col + 1));
+            return GetSurroundingTilesImpl(tile, from, false);
+        }
+
+        public List<Tile> GetSurroundingTiles(Tile tile, Tile from = null)
+        {
+            return GetSurroundingTilesImpl(tile, from, true);
+        }
+
+        public List<Tile> TilesOfType(List<Tile> surrounding, Space space)
+        {
+            for (int i = surrounding.Count - 1; i >= 0; --i)
+            {
+                if (surrounding[i].Space != space)
+                {
+                    surrounding.RemoveAt(i);
+                }
+            }
+            return surrounding;
+        }
+
+        private List<Tile> GetSurroundingTilesImpl(Tile tile, Tile from, bool includeCorners)
+        {
+            List<Tile> surrounding = new List<Tile>
+            {
+                GetTile(tile.Row - 1, tile.Col),
+                GetTile(tile.Row + 1, tile.Col),
+                GetTile(tile.Row, tile.Col - 1),
+                GetTile(tile.Row, tile.Col + 1)
+            };
             if (includeCorners)
             {
                 surrounding.Add(GetTile(tile.Row - 1, tile.Col - 1));
@@ -50,14 +74,6 @@ namespace Dungeon_Generator
             if (from != null)
             {
                 surrounding.Remove(from);
-            }
-
-            for (int i = surrounding.Count - 1; i >= 0; --i)
-            {
-                if (surrounding[i].Space != otherType)
-                {
-                    surrounding.RemoveAt(i);
-                }
             }
             return surrounding;
         }
