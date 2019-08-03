@@ -12,6 +12,38 @@ namespace Dungeon_Generator
         public Dungeon Dungeon { get; }
         public static Random Rng { get; }
 
+        public void CarveCorridor(Dungeon dungeon, Stack<CorridorTile> path)
+        {
+            // Unwrap the tiles in the stack to populate a set
+
+            HashSet<Tile> tiles = new HashSet<Tile>();
+            foreach (CorridorTile wrappedTile in path)
+            {
+                tiles.Add(wrappedTile.Tile);
+            }
+
+            while (path.Count > 0)
+            {
+                CorridorTile head = path.Pop();
+                tiles.Remove(head.Tile);
+                List<Tile> adjacents = dungeon.GetAdjacentTiles(head.Tile, head.From.Tile);
+                foreach (Tile adjacent in adjacents)
+                {
+                    if (tiles.Contains(adjacent))
+                    {
+                        // Loops exists, trim it
+
+                        while (path.Peek().Tile != adjacent)
+                        {
+                            Tile remove = path.Pop().Tile;
+                            tiles.Remove(remove);
+                        }
+                    }
+                }
+                head.Tile.Space = Space.Path;
+            }
+        }
+
         public void CorridorWalk(Dungeon dungeon, Tile door, double chanceToTurn)
         {
             bool DoorLeadsToOtherRoom(List<Tile> doors)
@@ -29,9 +61,9 @@ namespace Dungeon_Generator
             HashSet<CorridorTile> visited = new HashSet<CorridorTile>();
             Stack<CorridorTile> path = new Stack<CorridorTile>();
 
-            Tile headTile = dungeon.GetTileByDirection(door);
+            Tile firstTile = dungeon.GetTileByDirection(door);
             CorridorTile start = new CorridorTile(door, null, door.Direction);
-            CorridorTile head = new CorridorTile(headTile, start, door.Direction);
+            CorridorTile head = new CorridorTile(firstTile, start, door.Direction);
             path.Push(head);
             visited.Add(head);
             while (path.Count > 0)
@@ -57,11 +89,9 @@ namespace Dungeon_Generator
                         && DoorLeadsToOtherRoom(dungeon.GetAdjacentTilesOfType(head.Tile, Space.Door, head.From.Tile))))
                 {
                     // Carve the complete path
-                    while (path.Count > 0)
-                    {
-                        path.Pop().Tile.Space = Space.Path;
-                    }
-                    break;
+
+                    CarveCorridor(dungeon, path);
+                    return;
                 }
 
                 // Decide where to go next, or step back one tile if all paths have been explored
@@ -88,6 +118,11 @@ namespace Dungeon_Generator
                     path.Pop();
                 }
             }
+
+            // There are no doors or paths to connect to, so erase this door
+
+            //door.Room.Doors.Remove(door);
+            //door.Space = Space.Wall;
         }
 
         public void GenerateCorridor(Dungeon dungeon, Tile door, double chanceToTurn)
