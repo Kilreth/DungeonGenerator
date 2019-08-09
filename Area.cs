@@ -17,10 +17,28 @@ namespace Dungeon_Generator
             To.Add(other);
         }
 
-        public void InitializeNode()
+        public void InitializeArea()
         {
             To = new List<Area>();
             Id = ++NextId;
+        }
+
+        public override int GetHashCode()
+        {
+            return Id;
+        }
+
+        public override bool Equals(object obj)
+        {
+            if (obj != null && obj.GetType().IsSubclassOf(typeof(Area)))
+            {
+                Area other = (Area)obj;
+                return Id == other.Id;
+            }
+            else
+            {
+                return false;
+            }
         }
 
         static Area()

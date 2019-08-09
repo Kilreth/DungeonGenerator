@@ -50,7 +50,7 @@ namespace Dungeon_Generator
             {
                 foreach (Tile d in doors)
                 {
-                    if (d.Area.Id != door.Area.Id)
+                    if (d.Area != door.Area)
                     {
                         return true;
                     }
@@ -217,7 +217,7 @@ namespace Dungeon_Generator
                     break;
                 }
 
-                room.InitializeNode();
+                room.InitializeArea();
                 dungeon.CarveRoom(room);
                 remainingRoomTiles -= roomHeight * roomWidth;
             }
