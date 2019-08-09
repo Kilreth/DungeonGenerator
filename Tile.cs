@@ -14,6 +14,18 @@ namespace Dungeon_Generator
         public Direction Direction { get; set; }
         public Area Area { get; set; }
 
+        public static bool IsWalkable(Tile tile)
+        {
+            return IsWalkable(tile.Space);
+        }
+
+        public static bool IsWalkable(Space space)
+        {
+            return space == Space.Path
+                || space == Space.Room
+                || space == Space.Door;
+        }
+
         public static Direction Invert(Direction direction)
         {
             if (direction == Direction.None)
@@ -71,5 +83,5 @@ namespace Dungeon_Generator
     /// Path:    Vacant tiles that make corridors connecting doors
     /// Door:    Vacant tiles bridging rooms and paths
     /// </summary>
-    public enum Space { Granite, Rock, Room, Wall, Path, Door }
+    public enum Space { Granite, Rock, Room, Wall, Path, Door, WALKABLE }
 }

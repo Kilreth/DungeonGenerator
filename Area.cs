@@ -8,18 +8,22 @@ namespace Dungeon_Generator
 {
     public class Area
     {
-        public List<Area> To { get; private set; }
+        public HashSet<Area> To { get; private set; }
         public int Id { get; private set; }
         public static int NextId { get; set; }
 
         public void ConnectTo(Area other)
         {
-            To.Add(other);
+            if (other != this)
+            {
+                To.Add(other);
+                other.To.Add(this);
+            }
         }
 
         public void InitializeArea()
         {
-            To = new List<Area>();
+            To = new HashSet<Area>();
             Id = ++NextId;
         }
 

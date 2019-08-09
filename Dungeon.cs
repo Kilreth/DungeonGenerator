@@ -47,7 +47,14 @@ namespace Dungeon_Generator
         {
             for (int i = surrounding.Count - 1; i >= 0; --i)
             {
-                if (surrounding[i].Space != space)
+                if (space == Space.WALKABLE)
+                {
+                    if (!Tile.IsWalkable(surrounding[i]))
+                    {
+                        surrounding.RemoveAt(i);
+                    }
+                }
+                else if (surrounding[i].Space != space)
                 {
                     surrounding.RemoveAt(i);
                 }
@@ -134,7 +141,9 @@ namespace Dungeon_Generator
             {
                 for (int col = room.FirstCol; col < colToStop; col++)
                 {
-                    GetTile(row, col).Space = space;
+                    Tile tile = GetTile(row, col);
+                    tile.Space = space;
+                    tile.Area = room;
                 }
             }
         }

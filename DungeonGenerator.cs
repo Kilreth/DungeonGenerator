@@ -12,6 +12,17 @@ namespace Dungeon_Generator
         public Dungeon Dungeon { get; }
         public static Random Rng { get; }
 
+        public void ConnectAreas(Dungeon dungeon, Tile tile)
+        {
+            foreach (Tile adj in dungeon.GetAdjacentTiles(tile))
+            {
+                if (Tile.IsWalkable(adj.Space))
+                {
+                    tile.Area.ConnectTo(adj.Area);
+                }
+            }
+        }
+
         public void CarveCorridor(Dungeon dungeon, Stack<CorridorTile> path)
         {
             // Unwrap the tiles in the stack to populate a set
@@ -21,6 +32,29 @@ namespace Dungeon_Generator
             {
                 tiles.Add(wrappedTile.Tile);
             }
+
+            Tile end = path.Peek().Tile;
+
+            // Get an existing Path object if there is one; otherwise make a new object
+
+            Area area;
+            List<Tile> adjacentPaths = dungeon.GetAdjacentTilesOfType(path.Peek().Tile, Space.Path);
+            if (adjacentPaths.Count > 0)
+            {
+                area = adjacentPaths[0].Area;
+            }
+            else
+            {
+                area = new Path();
+                area.InitializeArea();
+            }
+
+            // Connect to any adjacent Area objects
+
+            end.Area = area;
+            ConnectAreas(dungeon, end);
+
+            // Finally begin carving the corridor
 
             while (path.Count > 0)
             {
@@ -41,6 +75,7 @@ namespace Dungeon_Generator
                     }
                 }
                 head.Tile.Space = Space.Path;
+                head.Tile.Area = area;
             }
         }
 
@@ -131,9 +166,9 @@ namespace Dungeon_Generator
 
             // If tile outside of door is already an end target, there is nothing to do
 
-            if (startOfPath.Space == Space.Path || startOfPath.Space == Space.Door
-                || startOfPath.Space == Space.Room)
+            if (Tile.IsWalkable(startOfPath.Space))
             {
+                ConnectAreas(dungeon, door);
                 return;
             }
 
@@ -142,16 +177,20 @@ namespace Dungeon_Generator
 
             if (startOfPath.Space == Space.Wall)
             {
-                Tile current = startOfPath;
-                Tile previous = door;
-                while (!dungeon.IsTileAdjacentTo(current, Space.Room)
-                    && !dungeon.IsTileAdjacentTo(current, Space.Door, previous))   // don't count door we came from
+                // Prepare a stack of path tiles so we can call our general method to carve the corridor
+
+                Stack<CorridorTile> path = new Stack<CorridorTile>();
+                CorridorTile wrappedDoor = new CorridorTile(door, null, door.Direction);
+                CorridorTile head = new CorridorTile(startOfPath, wrappedDoor, door.Direction);
+                path.Push(head);
+                while (!dungeon.IsTileAdjacentTo(head.Tile, Space.WALKABLE, head.From.Tile))
                 {
-                    current.Space = Space.Path;
-                    previous = current;
-                    current = dungeon.GetTileByDirection(current, door.Direction);
+                    Tile nextTile = dungeon.GetTileByDirection(head.Tile, door.Direction);
+                    head = new CorridorTile(nextTile, head, door.Direction);
+                    path.Push(head);
                 }
-                current.Space = Space.Path;
+
+                CarveCorridor(dungeon, path);
                 return;
             }
 
