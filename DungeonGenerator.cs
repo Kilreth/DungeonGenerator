@@ -50,7 +50,7 @@ namespace Dungeon_Generator
             {
                 foreach (Tile d in doors)
                 {
-                    if (d.Room.Id != door.Room.Id)
+                    if (d.Area.Id != door.Area.Id)
                     {
                         return true;
                     }
@@ -209,7 +209,7 @@ namespace Dungeon_Generator
                 {
                     row = Rng.Next(dungeonEdge, dungeon.Height - roomHeight - dungeonEdge + 1);
                     col = Rng.Next(dungeonEdge, dungeon.Width - roomWidth - dungeonEdge + 1);
-                    room.Replace(row, col, roomHeight, roomWidth, dungeon.Rooms.Count);
+                    room.Replace(row, col, roomHeight, roomWidth);
                     ++attempts;
                 } while (!room.CanRoomFit(dungeon) && attempts != 100);
                 if (attempts == 100)
@@ -217,6 +217,7 @@ namespace Dungeon_Generator
                     break;
                 }
 
+                room.InitializeNode();
                 dungeon.CarveRoom(room);
                 remainingRoomTiles -= roomHeight * roomWidth;
             }

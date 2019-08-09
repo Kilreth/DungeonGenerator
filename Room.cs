@@ -10,14 +10,13 @@ namespace Dungeon_Generator
     /// A Room represents the vacant tiles in a room.
     /// A Room may create an Outer room which includes surrounding wall tiles.
     /// </summary>
-    public class Room
+    public class Room : Area
     {
 
         public int FirstRow { get; private set; }
         public int FirstCol { get; private set; }
         public int Height { get; private set; }
         public int Width { get; private set; }
-        public int Id { get; private set; }
         public int NumTiles { get; private set; }
 
         public Room Outer { get; private set; }
@@ -77,7 +76,7 @@ namespace Dungeon_Generator
                 {
                     Doors.Add(door);
                     door.Space = Space.Door;
-                    door.Room = this;
+                    door.Area = this;
                 }
             }
         }
@@ -124,13 +123,12 @@ namespace Dungeon_Generator
             }
         }
 
-        private void Initialise(int firstRow, int firstCol, int height, int width, int id)
+        private void Initialise(int firstRow, int firstCol, int height, int width)
         {
             FirstRow = firstRow;
             FirstCol = firstCol;
             Height = height;
             Width = width;
-            Id = id;
             SetNumTiles();
 
             Outer = null;
@@ -138,14 +136,14 @@ namespace Dungeon_Generator
             walls = null;
         }
 
-        public void Replace(int firstRow, int firstCol, int height, int width, int id=-1)
+        public void Replace(int firstRow, int firstCol, int height, int width)
         {
-            Initialise(firstRow, firstCol, height, width, id);
+            Initialise(firstRow, firstCol, height, width);
         }
 
-        public Room(int firstRow, int firstCol, int height, int width, int id=-1)
+        public Room(int firstRow, int firstCol, int height, int width)
         {
-            Initialise(firstRow, firstCol, height, width, id);
+            Initialise(firstRow, firstCol, height, width);
         }
     }
 }

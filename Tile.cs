@@ -12,7 +12,7 @@ namespace Dungeon_Generator
         public int Col { get; }
         public Space Space { get; set; }
         public Direction Direction { get; set; }
-        public Room Room { get; set; }
+        public Area Area { get; set; }
 
         public static Direction Invert(Direction direction)
         {
