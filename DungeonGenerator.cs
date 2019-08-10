@@ -197,8 +197,9 @@ namespace Dungeon_Generator
 
             // There are no doors or paths to connect to, so erase this door
 
-            //door.Room.Doors.Remove(door);
-            //door.Space = Space.Wall;
+            Room room = (Room)door.Area;
+            room.Doors.Remove(door);
+            door.Space = Space.Wall;
         }
 
         public void GenerateCorridor(Dungeon dungeon, Tile door, double chanceToTurn)
@@ -244,9 +245,12 @@ namespace Dungeon_Generator
         {
             foreach (Room room in dungeon.Rooms)
             {
-                foreach (Tile door in room.Doors)
+                // If no corridor can be formed from a door, the door is removed
+                // So a room's list of doors may shrink as we iterate over it
+
+                for (int i = room.Doors.Count - 1; i >= 0; --i)
                 {
-                    GenerateCorridor(dungeon, door, chanceToTurn);
+                    GenerateCorridor(dungeon, room.Doors[i], chanceToTurn);
                 }
             }
         }
