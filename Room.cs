@@ -126,6 +126,14 @@ namespace Dungeon_Generator
             }
         }
 
+        public void FlagDebug()
+        {
+            foreach (Tile tile in walls)
+            {
+                tile.Debug = true;
+            }
+        }
+
         private void SetNumTiles()
         {
             NumTiles = Height * Width;

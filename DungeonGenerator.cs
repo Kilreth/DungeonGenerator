@@ -15,6 +15,12 @@ namespace Dungeon_Generator
         public void MakeConnectedGraph(Dungeon dungeon)
         {
             List<Room> unconnectedRooms = dungeon.FindUnconnectedRooms();
+            foreach (Room room in unconnectedRooms)
+            {
+                room.FlagDebug();
+            }
+
+            return;
             while (unconnectedRooms.Count > 0)
             {
                 Room room = unconnectedRooms[Rng.Next(0, unconnectedRooms.Count)];
@@ -75,7 +81,7 @@ namespace Dungeon_Generator
                 area.InitializeArea();
             }
 
-            // Connect to any adjacent Area objects
+            // Connect the *end* of the path to any adjacent Area objects
 
             Tile end = path.Peek().Tile;
             end.Area = area;
@@ -83,9 +89,10 @@ namespace Dungeon_Generator
 
             // Finally begin carving the corridor
 
+            CorridorTile head = null;
             while (path.Count > 0)
             {
-                CorridorTile head = path.Pop();
+                head = path.Pop();
                 tiles.Remove(head.Tile);
                 List<Tile> adjacents = dungeon.GetAdjacentTiles(head.Tile, head.From.Tile);
                 foreach (Tile adjacent in adjacents)
@@ -104,6 +111,10 @@ namespace Dungeon_Generator
                 head.Tile.Space = Space.Path;
                 head.Tile.Area = area;
             }
+
+            // Connect the *start* of the path to the room it came from
+
+            ConnectAreas(dungeon, head.Tile);
         }
 
         /// <summary>
@@ -299,9 +310,9 @@ namespace Dungeon_Generator
         {
             Dungeon = new Dungeon(height, width);
             GenerateRooms(Dungeon, 0.9, 3, 3, 9, 9);
-            GenerateDoors(Dungeon, 0.08);
+            GenerateDoors(Dungeon, 0.1);
             GenerateCorridors(Dungeon, 0.2);
-            MakeConnectedGraph(Dungeon);
+            //MakeConnectedGraph(Dungeon);
         }
 
         static DungeonGenerator()

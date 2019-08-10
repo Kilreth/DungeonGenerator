@@ -22,7 +22,11 @@ namespace Dungeon_Generator
             DungeonGenerator dungeonGenerator = new DungeonGenerator(60, 80);
             Form1 obj = new Form1(dungeonGenerator.Dungeon);
             Application.Run(obj);
-            
+
+            dungeonGenerator.MakeConnectedGraph(dungeonGenerator.Dungeon);
+            Form1 obj2 = new Form1(dungeonGenerator.Dungeon);
+            Application.Run(obj2);
+
             //Application.Run(new Form1());
         }
     }
