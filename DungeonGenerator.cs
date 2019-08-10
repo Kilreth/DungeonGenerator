@@ -12,28 +12,25 @@ namespace Dungeon_Generator
         public Dungeon Dungeon { get; }
         public static Random Rng { get; }
 
-        public void MakeConnectedGraph(Dungeon dungeon)
+        public void MakeConnectedGraph(Dungeon dungeon, double chanceToTurn)
         {
             List<Room> unconnectedRooms = dungeon.FindUnconnectedRooms();
-            foreach (Room room in unconnectedRooms)
-            {
-                room.FlagDebug();
-            }
-
-            return;
             while (unconnectedRooms.Count > 0)
             {
+                foreach (Room r in unconnectedRooms)
+                {
+                    r.FlagDebug();
+                }
                 Room room = unconnectedRooms[Rng.Next(0, unconnectedRooms.Count)];
                 Tile door = room.GenerateDoor(dungeon);
                 if (door != null)
                 {
                     door.Debug = true;
                     GenerateCorridor(dungeon, door, 0.2);
-                    //unconnectedRooms = dungeon.FindUnconnectedRooms();
                 }
                 else
                 {
-                    //return;
+                    return;
                 }
 
                 unconnectedRooms = dungeon.FindUnconnectedRooms();
@@ -129,7 +126,7 @@ namespace Dungeon_Generator
             {
                 foreach (Tile d in doors)
                 {
-                    if (d.Area != door.Area)
+                    if (door.Area != d.Area)
                     {
                         return true;
                     }
@@ -161,7 +158,7 @@ namespace Dungeon_Generator
                 }
 
                 // Have we found a door, or an existing path?
-                // If looking for a door, verify not all adjacent doors belong to the room we came from
+                // If looking for a door, verify one adjacent door does not belong to the room we came from
 
                 if (dungeon.IsTileAdjacentTo(head.Tile, Space.Path, head.From.Tile)
                     || (dungeon.IsTileAdjacentTo(head.Tile, Space.Door, head.From.Tile)
@@ -312,7 +309,7 @@ namespace Dungeon_Generator
             GenerateRooms(Dungeon, 0.9, 3, 3, 9, 9);
             GenerateDoors(Dungeon, 0.1);
             GenerateCorridors(Dungeon, 0.2);
-            //MakeConnectedGraph(Dungeon);
+            //MakeConnectedGraph(Dungeon, 0.2);
         }
 
         static DungeonGenerator()
