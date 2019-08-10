@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace Dungeon_Generator
 {
-    class Path : Area
+    public class Path : Area
     {
 
     }

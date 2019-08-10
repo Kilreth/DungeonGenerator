@@ -12,6 +12,34 @@ namespace Dungeon_Generator
         public Dungeon Dungeon { get; }
         public static Random Rng { get; }
 
+        public void MakeConnectedGraph(Dungeon dungeon)
+        {
+            List<Room> unconnectedRooms = dungeon.FindUnconnectedRooms();
+            while (unconnectedRooms.Count > 0)
+            {
+                Room room = unconnectedRooms[Rng.Next(0, unconnectedRooms.Count)];
+                Tile door = room.GenerateDoor(dungeon);
+                if (door != null)
+                {
+                    door.Debug = true;
+                    GenerateCorridor(dungeon, door, 0.2);
+                    //unconnectedRooms = dungeon.FindUnconnectedRooms();
+                }
+                else
+                {
+                    //return;
+                }
+
+                unconnectedRooms = dungeon.FindUnconnectedRooms();
+            }
+        }
+
+        /// <summary>
+        /// Link all adjacent walkable areas to the area a given tile belongs to.
+        /// For example, link the end of a path to the room behind a door.
+        /// </summary>
+        /// <param name="dungeon"></param>
+        /// <param name="tile"></param>
         public void ConnectAreas(Dungeon dungeon, Tile tile)
         {
             foreach (Tile adj in dungeon.GetAdjacentTiles(tile))
@@ -33,8 +61,6 @@ namespace Dungeon_Generator
                 tiles.Add(wrappedTile.Tile);
             }
 
-            Tile end = path.Peek().Tile;
-
             // Get an existing Path object if there is one; otherwise make a new object
 
             Area area;
@@ -51,6 +77,7 @@ namespace Dungeon_Generator
 
             // Connect to any adjacent Area objects
 
+            Tile end = path.Peek().Tile;
             end.Area = area;
             ConnectAreas(dungeon, end);
 
@@ -79,6 +106,12 @@ namespace Dungeon_Generator
             }
         }
 
+        /// <summary>
+        /// Perform a flood-fill search from a door to another room's door or a path.
+        /// </summary>
+        /// <param name="dungeon"></param>
+        /// <param name="door"></param>
+        /// <param name="chanceToTurn"></param>
         public void CorridorWalk(Dungeon dungeon, Tile door, double chanceToTurn)
         {
             bool DoorLeadsToOtherRoom(List<Tile> doors)
@@ -266,8 +299,9 @@ namespace Dungeon_Generator
         {
             Dungeon = new Dungeon(height, width);
             GenerateRooms(Dungeon, 0.9, 3, 3, 9, 9);
-            GenerateDoors(Dungeon, 0.1);
+            GenerateDoors(Dungeon, 0.08);
             GenerateCorridors(Dungeon, 0.2);
+            MakeConnectedGraph(Dungeon);
         }
 
         static DungeonGenerator()

@@ -8,6 +8,8 @@ namespace Dungeon_Generator
 {
     public class Tile
     {
+        public bool Debug { get; set; }
+
         public int Row { get; }
         public int Col { get; }
         public Space Space { get; set; }

@@ -61,24 +61,40 @@ namespace Dungeon_Generator
             // How many doors will we make?
             int numDoors = (int) (walls.Count * doorToWallRatio);
             numDoors += DungeonGenerator.Rng.Next(-1, 2);   // add -1, 0, or 1
-            if (numDoors == 0)
+            if (numDoors < 1)
             {
-                ++numDoors;
+                numDoors = 1;
             }
 
             Doors = new List<Tile>();
-            Tile door;
             while (Doors.Count < numDoors)
             {
-                door = walls[DungeonGenerator.Rng.Next(0, walls.Count)];
+                GenerateDoor(dungeon);
+            }
+        }
+
+        public Tile GenerateDoor(Dungeon dungeon)
+        {
+            int tries = 0;
+            while (tries < 100)
+            {
+                Tile door = walls[DungeonGenerator.Rng.Next(0, walls.Count)];
                 if (!Doors.Contains(door) && !dungeon.IsTileSurroundedBy(door, Space.Door)
                     && dungeon.GetTileByDirection(door).Space != Space.Granite)
                 {
                     Doors.Add(door);
                     door.Space = Space.Door;
                     door.Area = this;
+                    return door;
                 }
+                ++tries;
             }
+            foreach (Tile tile in walls)
+            {
+                tile.Debug = true;
+            }
+            return null;
+            //throw new InvalidOperationException("Room for another door could not be found");
         }
 
         /// <summary>

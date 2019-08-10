@@ -26,6 +26,7 @@ namespace Dungeon_Generator
         private void Form1_Paint(object sender, PaintEventArgs e)
         {
             Graphics graphics = CreateGraphics();
+            Brush debugBrush = new SolidBrush(Color.Red);
             Brush edgeBrush = new SolidBrush(Color.Black);
             Brush graniteBrush = new SolidBrush(Color.DarkViolet);
             Brush rockBrush = new SolidBrush(Color.Gray);
@@ -64,10 +65,19 @@ namespace Dungeon_Generator
                     {
                         brush = graniteBrush;
                     }
+
+                    if (tiles[row, col].Debug)
+                    {
+                        edgeBrush = debugBrush;
+                    }
+                    else
+                    {
+                        edgeBrush = brush;
+                    }
                     graphics.FillRectangle(edgeBrush, new Rectangle(
                             startX + col * tileSize, startY + row * tileSize, tileSize, tileSize));
                     graphics.FillRectangle(brush, new Rectangle(
-                            startX + col * tileSize, startY + row * tileSize, tileSize, tileSize));
+                            startX + 1 + col * tileSize, startY + 1 + row * tileSize, tileSize - 2, tileSize - 2));
                 }
             }
         }

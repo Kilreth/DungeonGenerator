@@ -12,6 +12,60 @@ namespace Dungeon_Generator
         public int Width { get; }
         public Tile[,] Tiles { get; private set; }
         public List<Room> Rooms { get; private set; }
+        public List<Path> Paths { get; private set; }
+
+        /// <summary>
+        /// Return a list of Rooms that are not connected to the "main" dungeon.
+        /// This list does not necessarily contain *all* unconnected Rooms!
+        /// </summary>
+        /// <returns></returns>
+        public List<Room> FindUnconnectedRooms()
+        {
+            HashSet<Area> visited = new HashSet<Area>();
+            Queue<Area> toVisit = new Queue<Area>();
+            Area start = Rooms[DungeonGenerator.Rng.Next(0, Rooms.Count)];
+            toVisit.Enqueue(start);
+            visited.Add(start);
+            while (toVisit.Count > 0)
+            {
+                Area area = toVisit.Dequeue();
+                foreach (Area neighbor in area.To)
+                {
+                    if (!visited.Contains(neighbor))
+                    {
+                        toVisit.Enqueue(neighbor);
+                        visited.Add(neighbor);
+                    }
+                }
+            }
+
+            // Only consider Rooms to connect
+
+            List<Room> unvisitedRooms = new List<Room>();
+            List<Room> visitedRooms = new List<Room>();
+            foreach (Room room in Rooms)
+            {
+                if (visited.Contains(room))
+                {
+                    visitedRooms.Add(room);
+                }
+                else
+                {
+                    unvisitedRooms.Add(room);
+                }
+            }
+
+            // The smaller of the two lists is probably easier to connect to something
+
+            if (unvisitedRooms.Count < visitedRooms.Count)
+            {
+                return unvisitedRooms;
+            }
+            else
+            {
+                return visitedRooms;
+            }
+        }
 
         public bool IsTileAdjacentTo(Tile tile, Space otherType, Tile from = null)
         {
@@ -190,6 +244,7 @@ namespace Dungeon_Generator
             Width = width;
             Initialize();
             Rooms = new List<Room>();
+            Paths = new List<Path>();
         }
     }
 }
