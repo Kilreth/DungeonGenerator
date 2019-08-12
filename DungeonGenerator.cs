@@ -26,7 +26,10 @@ namespace Dungeon_Generator
                 if (door != null)
                 {
                     door.Debug = true;
-                    GenerateCorridor(dungeon, door, 0.2);
+
+                    // Avoid wasting doors on paths that don't connect anywhere new
+                    bool allowConnectionToConnectedPath = false;
+                    GenerateCorridor(dungeon, door, chanceToTurn, allowConnectionToConnectedPath);
                 }
                 else
                 {
@@ -120,8 +123,20 @@ namespace Dungeon_Generator
         /// <param name="dungeon"></param>
         /// <param name="door"></param>
         /// <param name="chanceToTurn"></param>
-        public void CorridorWalk(Dungeon dungeon, Tile door, double chanceToTurn)
+        public void CorridorWalk(Dungeon dungeon, Tile door, double chanceToTurn, bool allowConnectionToConnectedPath)
         {
+            bool RoomUnconnectedToAdjacentPath(List<Tile> paths)
+            {
+                foreach (Tile p in paths)
+                {
+                    if (!door.Area.To.Contains(p.Area))
+                    {
+                        return true;
+                    }
+                }
+                return false;
+            }
+
             bool DoorLeadsToOtherRoom(List<Tile> doors)
             {
                 foreach (Tile d in doors)
@@ -157,17 +172,41 @@ namespace Dungeon_Generator
                     continue;
                 }
 
-                // Have we found a door, or an existing path?
-                // If looking for a door, verify one adjacent door does not belong to the room we came from
+                // Have we found any doors?
+                // If all adjacent doors lead to the room we came from, carry on
 
-                if (dungeon.IsTileAdjacentTo(head.Tile, Space.Path, head.From.Tile)
-                    || (dungeon.IsTileAdjacentTo(head.Tile, Space.Door, head.From.Tile)
-                        && DoorLeadsToOtherRoom(dungeon.GetAdjacentTilesOfType(head.Tile, Space.Door, head.From.Tile))))
+                if (dungeon.IsTileAdjacentTo(head.Tile, Space.Door, head.From.Tile)
+                        && DoorLeadsToOtherRoom(dungeon.GetAdjacentTilesOfType(head.Tile, Space.Door, head.From.Tile)))
                 {
-                    // Carve the complete path
-
                     CarveCorridor(dungeon, path);
                     return;
+                }
+
+                // Have we found an existing path? Connect to it and end
+                // If we are not allowed to connect to it, then we must skirt around it
+
+                if (dungeon.IsTileAdjacentTo(head.Tile, Space.Path, head.From.Tile))
+                {
+                    if (allowConnectionToConnectedPath)
+                    {
+                        CarveCorridor(dungeon, path);
+                        return;
+                    }
+                    else
+                    {
+                        if (RoomUnconnectedToAdjacentPath(dungeon.GetAdjacentTilesOfType(head.Tile, Space.Path, head.From.Tile)))
+                        {
+                            CarveCorridor(dungeon, path);
+                            return;
+                        }
+                        else
+                        {
+                            // Do not allow our path to touch existing paths. Treat this tile as non-carvable
+
+                            path.Pop();
+                            continue;
+                        }
+                    }
                 }
 
                 // Decide where to go next, or step back one tile if all paths have been explored
@@ -202,7 +241,7 @@ namespace Dungeon_Generator
             door.Space = Space.Wall;
         }
 
-        public void GenerateCorridor(Dungeon dungeon, Tile door, double chanceToTurn)
+        public void GenerateCorridor(Dungeon dungeon, Tile door, double chanceToTurn, bool allowConnectionToConnectedPath)
         {
             Tile startOfPath = dungeon.GetTileByDirection(door, door.Direction);
 
@@ -238,7 +277,7 @@ namespace Dungeon_Generator
 
             // If there is solid stone ahead, start a path
 
-            CorridorWalk(dungeon, door, chanceToTurn);
+            CorridorWalk(dungeon, door, chanceToTurn, allowConnectionToConnectedPath);
         }
 
         public void GenerateCorridors(Dungeon dungeon, double chanceToTurn)
@@ -248,9 +287,10 @@ namespace Dungeon_Generator
                 // If no corridor can be formed from a door, the door is removed
                 // So a room's list of doors may shrink as we iterate over it
 
+                bool allowConnectionToConnectedPath = true;
                 for (int i = room.Doors.Count - 1; i >= 0; --i)
                 {
-                    GenerateCorridor(dungeon, room.Doors[i], chanceToTurn);
+                    GenerateCorridor(dungeon, room.Doors[i], chanceToTurn, allowConnectionToConnectedPath);
                 }
             }
         }
