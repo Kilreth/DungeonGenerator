@@ -245,9 +245,11 @@ namespace Dungeon_Generator
         {
             Tile startOfPath = dungeon.GetTileByDirection(door, door.Direction);
 
-            // If tile outside of door is already an end target, there is nothing to do
+            // If door is already connected to a path or another door, there is nothing to do
+            // (The initial set of doors touch no other doors, so if a door is adjacent,
+            // it was spawned while carving a path straight ahead.)
 
-            if (Tile.IsWalkable(startOfPath.Space))
+            if (dungeon.IsTileAdjacentTo(door, Space.WALKABLE, dungeon.GetTileByDirection(door, Tile.Invert(door.Direction))))
             {
                 ConnectAreas(dungeon, door);
                 return;
@@ -271,7 +273,27 @@ namespace Dungeon_Generator
                     path.Push(head);
                 }
 
-                CarveCorridor(dungeon, path);
+                // If the last tile is directly touching another room's interior, make this tile a door
+                // As a wall tile originally, the door tile is already facing out from its room
+
+                Tile otherDoor = path.Peek().Tile;
+                if (dungeon.IsTileAdjacentTo(otherDoor, Space.Room))
+                {
+                    path.Pop();
+                    Room otherRoom = (Room)otherDoor.Area;
+                    otherRoom.SetTileAsDoor(otherDoor);
+                }
+
+                // If we didn't pop our only path tile off of the stack, carve the remaining corridor
+
+                if (path.Count > 0)
+                {
+                    CarveCorridor(dungeon, path);
+                }
+                else
+                {
+                    ConnectAreas(dungeon, door);
+                }
                 return;
             }
 

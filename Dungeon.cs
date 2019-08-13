@@ -187,7 +187,7 @@ namespace Dungeon_Generator
             return Tiles[row, col];
         }
 
-        private void CarveRoomHelper(Room room, Space space)
+        private void CarveRoomHelper(Room room, Space space, Area area)
         {
             int rowToStop = room.FirstRow + room.Height;
             int colToStop = room.FirstCol + room.Width;
@@ -197,15 +197,15 @@ namespace Dungeon_Generator
                 {
                     Tile tile = GetTile(row, col);
                     tile.Space = space;
-                    tile.Area = room;
+                    tile.Area = area;
                 }
             }
         }
 
         public void CarveRoom(Room room)
         {
-            CarveRoomHelper(room.Outer, Space.Wall);
-            CarveRoomHelper(room, Space.Room);
+            CarveRoomHelper(room.Outer, Space.Wall, room);
+            CarveRoomHelper(room, Space.Room, room);
             Rooms.Add(room);
         }
 

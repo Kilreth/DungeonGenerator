@@ -66,7 +66,6 @@ namespace Dungeon_Generator
                 numDoors = 1;
             }
 
-            Doors = new List<Tile>();
             while (Doors.Count < numDoors)
             {
                 GenerateDoor(dungeon);
@@ -82,9 +81,7 @@ namespace Dungeon_Generator
                 if (!Doors.Contains(door) && !dungeon.IsTileSurroundedBy(door, Space.Door)
                     && dungeon.GetTileByDirection(door).Space != Space.Granite)
                 {
-                    Doors.Add(door);
-                    door.Space = Space.Door;
-                    door.Area = this;
+                    SetTileAsDoor(door);
                     return door;
                 }
                 ++tries;
@@ -95,6 +92,12 @@ namespace Dungeon_Generator
             }
             return null;
             //throw new InvalidOperationException("Room for another door could not be found");
+        }
+
+        public void SetTileAsDoor(Tile tile)
+        {
+            Doors.Add(tile);
+            tile.Space = Space.Door;
         }
 
         /// <summary>
@@ -156,7 +159,7 @@ namespace Dungeon_Generator
             SetNumTiles();
 
             Outer = null;
-            Doors = null;
+            Doors = new List<Tile>();
             walls = null;
         }
 
