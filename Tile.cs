@@ -85,5 +85,5 @@ namespace Dungeon_Generator
     /// Path:    Vacant tiles that make corridors connecting doors
     /// Door:    Vacant tiles bridging rooms and paths
     /// </summary>
-    public enum Space { Granite, Rock, Room, Wall, Path, Door, WALKABLE }
+    public enum Space { Granite, Rock, Room, Wall, Path, Door, StairsUp, StairsDown, Key, WALKABLE }
 }

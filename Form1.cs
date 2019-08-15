@@ -26,6 +26,9 @@ namespace Dungeon_Generator
         private void Form1_Paint(object sender, PaintEventArgs e)
         {
             Graphics graphics = CreateGraphics();
+            Font drawFont = new System.Drawing.Font("Arial", 8);
+            StringFormat drawFormat = new System.Drawing.StringFormat();
+            Brush textBrush = new SolidBrush(Color.Black);
             Brush debugBrush = new SolidBrush(Color.Red);
             Brush edgeBrush = new SolidBrush(Color.Black);
             Brush graniteBrush = new SolidBrush(Color.DarkViolet);
@@ -41,32 +44,36 @@ namespace Dungeon_Generator
             {
                 for (int col = 0; col < tiles.GetLength(1); col++)
                 {
-                    if (tiles[row, col].Space == Space.Rock)
+                    Tile tile = tiles[row, col];
+                    if (tile.Space == Space.Rock)
                     {
                         brush = rockBrush;
                     }
-                    else if (tiles[row, col].Space == Space.Path)
+                    else if (tile.Space == Space.Path)
                     {
                         brush = pathBrush;
                     }
-                    else if (tiles[row, col].Space == Space.Room)
+                    else if (tile.Space == Space.Room
+                          || tile.Space == Space.StairsUp
+                          || tile.Space == Space.StairsDown
+                          || tile.Space == Space.Key)
                     {
                         brush = roomBrush;
                     }
-                    else if (tiles[row, col].Space == Space.Door)
+                    else if (tile.Space == Space.Door)
                     {
                         brush = doorBrush;
                     }
-                    else if (tiles[row, col].Space == Space.Wall)
+                    else if (tile.Space == Space.Wall)
                     {
                         brush = wallBrush;
                     }
-                    else if (tiles[row, col].Space == Space.Granite)
+                    else if (tile.Space == Space.Granite)
                     {
                         brush = graniteBrush;
                     }
 
-                    if (tiles[row, col].Debug)
+                    if (tile.Debug)
                     {
                         edgeBrush = debugBrush;
                     }
@@ -78,8 +85,21 @@ namespace Dungeon_Generator
                             startX + col * tileSize, startY + row * tileSize, tileSize, tileSize));
                     graphics.FillRectangle(brush, new Rectangle(
                             startX + 1 + col * tileSize, startY + 1 + row * tileSize, tileSize - 2, tileSize - 2));
+                    if (tile.Space == Space.StairsUp)
+                    {
+                        graphics.DrawString("<", drawFont, textBrush, startX + col * tileSize, startY + row * tileSize - 2, drawFormat);
+                    }
+                    else if (tile.Space == Space.StairsDown)
+                    {
+                        graphics.DrawString(">", drawFont, textBrush, startX + col * tileSize, startY + row * tileSize - 2, drawFormat);
+                    }
+                    else if (tile.Space == Space.Key)
+                    {
+                        graphics.DrawString("k", drawFont, textBrush, startX + col * tileSize, startY + row * tileSize - 2, drawFormat);
+                    }
                 }
             }
+
         }
     }
 }
