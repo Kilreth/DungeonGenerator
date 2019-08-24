@@ -97,6 +97,10 @@ namespace Dungeon_Generator
                     {
                         graphics.DrawString("k", drawFont, textBrush, startX + col * tileSize, startY + row * tileSize - 2, drawFormat);
                     }
+                    if (tile.Text != null)
+                    {
+                        graphics.DrawString(tile.Text, drawFont, textBrush, startX + (col-1) * tileSize, startY + row * tileSize - 2, drawFormat);
+                    }
                 }
             }
 

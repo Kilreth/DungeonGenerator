@@ -14,18 +14,30 @@ namespace Dungeon_Generator
         public List<Room> Rooms { get; private set; }
         public List<Path> Paths { get; private set; }
 
+        public List<Room> FindUnconnectedRooms(Room start)
+        {
+            return RoomGraphTraversal(start, false);
+        }
+
+        public List<Room> FindConnectedRooms(Room start)
+        {
+            return RoomGraphTraversal(start, true);
+        }
+
         /// <summary>
-        /// Return a list of Rooms that are not connected to the "main" dungeon.
-        /// This list does not necessarily contain *all* unconnected Rooms!
+        /// Perform a breadth-first search for all rooms accessible from a given start room.
+        /// Return a list of rooms that are accessible, or a list of rooms that are not.
+        /// If returning unconnected rooms, the list is not necessarily complete!
         /// </summary>
         /// <returns></returns>
-        public List<Room> FindUnconnectedRooms()
+        private List<Room> RoomGraphTraversal(Room start, bool returnConnectedRooms)
         {
             HashSet<Area> visited = new HashSet<Area>();
+            List<Room> visitedRooms = new List<Room>();
             Queue<Area> toVisit = new Queue<Area>();
-            Area start = Rooms[DungeonGenerator.Rng.Next(0, Rooms.Count)];
             toVisit.Enqueue(start);
             visited.Add(start);
+            visitedRooms.Add(start);
             while (toVisit.Count > 0)
             {
                 Area area = toVisit.Dequeue();
@@ -35,35 +47,39 @@ namespace Dungeon_Generator
                     {
                         toVisit.Enqueue(neighbor);
                         visited.Add(neighbor);
+                        if (neighbor is Room)
+                        {
+                            visitedRooms.Add((Room)neighbor);
+                        }
                     }
                 }
             }
 
-            // Only consider Rooms to connect
-
             List<Room> unvisitedRooms = new List<Room>();
-            List<Room> visitedRooms = new List<Room>();
             foreach (Room room in Rooms)
             {
-                if (visited.Contains(room))
-                {
-                    visitedRooms.Add(room);
-                }
-                else
+                if (!visited.Contains(room))
                 {
                     unvisitedRooms.Add(room);
                 }
             }
 
-            // The smaller of the two lists is probably easier to connect to something
-
-            if (unvisitedRooms.Count < visitedRooms.Count)
+            if (returnConnectedRooms)
             {
-                return unvisitedRooms;
+                return visitedRooms;
             }
             else
             {
-                return visitedRooms;
+                // We determine the unconnected rooms as the smaller of the two lists
+
+                if (unvisitedRooms.Count < visitedRooms.Count)
+                {
+                    return unvisitedRooms;
+                }
+                else
+                {
+                    return visitedRooms;
+                }
             }
         }
 
@@ -185,6 +201,11 @@ namespace Dungeon_Generator
         public Tile GetTile(int row, int col)
         {
             return Tiles[row, col];
+        }
+
+        public Room GetRandomRoom()
+        {
+            return Rooms[DungeonGenerator.Rng.Next(0, Rooms.Count)];
         }
 
         private void CarveRoomHelper(Room room, Space space, Area area)

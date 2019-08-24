@@ -9,6 +9,7 @@ namespace Dungeon_Generator
     public class Tile
     {
         public bool Debug { get; set; }
+        public string Text { get; set; }
 
         public int Row { get; }
         public int Col { get; }

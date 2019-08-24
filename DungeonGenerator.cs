@@ -12,10 +12,40 @@ namespace Dungeon_Generator
         public Dungeon Dungeon { get; }
         public static Random Rng { get; }
 
+        public void GenerateStairsAndKey(Dungeon dungeon)
+        {
+            // Although very unlikely, it is possible not all rooms at this point are connected
+            // Choose a random room that belongs to the connected dungeon
+            Room startRoom;
+            List<Room> roomsFromStart;
+            do
+            {
+                startRoom = dungeon.GetRandomRoom();
+                roomsFromStart = dungeon.FindConnectedRooms(startRoom);
+            }
+            while (roomsFromStart.Count * 2 < dungeon.Rooms.Count);
+            int totalRooms = roomsFromStart.Count;
+
+            // DEBUG: Draw BFS order on screen
+            for (int i = 0; i < totalRooms; ++i)
+            {
+                roomsFromStart[i].GetRandomTile(dungeon).Text = i.ToString();
+            }
+
+            // The goal room is the farthest room encountered in the breadth-first search
+            Room goalRoom = roomsFromStart[totalRooms - 1];
+            Room keyRoom  = roomsFromStart[Rng.Next((int)(totalRooms * 0.4), (int)(totalRooms * 0.6))];
+
+            startRoom.GetRandomTile(dungeon).Space = Space.StairsUp;
+            goalRoom.GetRandomTile(dungeon).Space = Space.StairsDown;
+            keyRoom.GetRandomTile(dungeon).Space = Space.Key;
+        }
+
         public void MakeConnectedGraph(Dungeon dungeon, double chanceToTurn)
         {
-            List<Room> unconnectedRooms = dungeon.FindUnconnectedRooms();
-            while (unconnectedRooms.Count > 0)
+            List<Room> unconnectedRooms = dungeon.FindUnconnectedRooms(dungeon.GetRandomRoom());
+            int tries = 0;
+            while (unconnectedRooms.Count > 0 && tries < dungeon.Rooms.Count)
             {
                 foreach (Room r in unconnectedRooms)
                 {
@@ -36,7 +66,8 @@ namespace Dungeon_Generator
                     return;
                 }
 
-                unconnectedRooms = dungeon.FindUnconnectedRooms();
+                unconnectedRooms = dungeon.FindUnconnectedRooms(dungeon.GetRandomRoom());
+                ++tries;
             }
         }
 

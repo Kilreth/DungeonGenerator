@@ -24,8 +24,9 @@ namespace Dungeon_Generator
             Application.Run(obj);
 
             dungeonGenerator.MakeConnectedGraph(dungeonGenerator.Dungeon, 0.2);
-            Form1 obj2 = new Form1(dungeonGenerator.Dungeon);
-            Application.Run(obj2);
+            dungeonGenerator.GenerateStairsAndKey(dungeonGenerator.Dungeon);
+            obj = new Form1(dungeonGenerator.Dungeon);
+            Application.Run(obj);
 
             //Application.Run(new Form1());
         }

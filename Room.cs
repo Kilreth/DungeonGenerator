@@ -137,6 +137,13 @@ namespace Dungeon_Generator
             }
         }
 
+        public Tile GetRandomTile(Dungeon dungeon)
+        {
+            int row = DungeonGenerator.Rng.Next(FirstRow, FirstRow + Height);
+            int col = DungeonGenerator.Rng.Next(FirstCol, FirstCol + Width);
+            return dungeon.GetTile(row, col);
+        }
+
         private void SetNumTiles()
         {
             NumTiles = Height * Width;
