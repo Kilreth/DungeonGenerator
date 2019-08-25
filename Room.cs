@@ -89,8 +89,12 @@ namespace Dungeon_Generator
             int tries = 0;
             while (tries < 100)
             {
+                // Because rooms can share walls, some wall tiles may already be doors from another room!
+                // So check the actual tile as well as this room's list of doors
+
                 Tile door = walls[DungeonGenerator.Rng.Next(0, walls.Count)];
-                if (!Doors.Contains(door) && !dungeon.IsTileSurroundedBy(door, Space.Door)
+                if (!Doors.Contains(door) && door.Space != Space.Door
+                    && !dungeon.IsTileSurroundedBy(door, Space.Door)
                     && dungeon.GetTileByDirection(door).Space != Space.Granite)
                 {
                     SetTileAsDoor(door);

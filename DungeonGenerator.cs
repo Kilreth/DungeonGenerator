@@ -82,8 +82,8 @@ namespace Dungeon_Generator
                     door.Debug = true;
 
                     // Avoid wasting doors on paths that don't connect anywhere new
-                    bool allowConnectionToConnectedPath = false;
-                    GenerateCorridor(dungeon, door, chanceToTurn, allowConnectionToConnectedPath);
+                    bool allowConnectionToConnectedArea = false;
+                    GenerateCorridor(dungeon, door, chanceToTurn, allowConnectionToConnectedArea);
                 }
                 else
                 {
@@ -183,20 +183,8 @@ namespace Dungeon_Generator
         /// <param name="dungeon"></param>
         /// <param name="door"></param>
         /// <param name="chanceToTurn"></param>
-        public void CorridorWalk(Dungeon dungeon, Tile door, double chanceToTurn, bool allowConnectionToConnectedPath)
+        public void CorridorWalk(Dungeon dungeon, Tile door, double chanceToTurn, bool allowConnectionToConnectedArea)
         {
-            bool RoomUnconnectedToAdjacentPath(List<Tile> paths)
-            {
-                foreach (Tile p in paths)
-                {
-                    if (!door.Area.To.Contains(p.Area))
-                    {
-                        return true;
-                    }
-                }
-                return false;
-            }
-
             bool DoorLeadsToOtherRoom(List<Tile> doors)
             {
                 foreach (Tile d in doors)
@@ -248,25 +236,18 @@ namespace Dungeon_Generator
 
                 if (dungeon.IsTileAdjacentTo(head.Tile, Space.Path, head.From.Tile))
                 {
-                    if (allowConnectionToConnectedPath)
+                    if (allowConnectionToConnectedArea || RoomUnconnectedToAdjacentArea(door.Area,
+                        dungeon.GetAdjacentTilesOfType(head.Tile, Space.Path, head.From.Tile)))
                     {
                         CarveCorridor(dungeon, path);
                         return;
                     }
                     else
                     {
-                        if (RoomUnconnectedToAdjacentPath(dungeon.GetAdjacentTilesOfType(head.Tile, Space.Path, head.From.Tile)))
-                        {
-                            CarveCorridor(dungeon, path);
-                            return;
-                        }
-                        else
-                        {
-                            // Do not allow our path to touch existing paths. Treat this tile as non-carvable
+                        // Do not allow our path to touch existing paths. Treat this tile as non-carvable
 
-                            path.Pop();
-                            continue;
-                        }
+                        path.Pop();
+                        continue;
                     }
                 }
 
@@ -296,10 +277,7 @@ namespace Dungeon_Generator
             }
 
             // There are no doors or paths to connect to, so erase this door
-
-            Room room = (Room)door.Area;
-            room.Doors.Remove(door);
-            door.Space = Space.Wall;
+            EraseDoor(door);
         }
 
         /// <summary>
@@ -311,7 +289,7 @@ namespace Dungeon_Generator
         /// <param name="dungeon"></param>
         /// <param name="door"></param>
         /// <param name="startOfPath"></param>
-        public void CorridorThroughRoomWall(Dungeon dungeon, Tile door, Tile startOfPath)
+        public void CorridorThroughRoomWall(Dungeon dungeon, Tile door, Tile startOfPath, bool allowConnectionToConnectedArea)
         {
             // Prepare a stack of path tiles so we can call our general method to carve the corridor
 
@@ -324,6 +302,13 @@ namespace Dungeon_Generator
                 Tile nextTile = dungeon.GetTileByDirection(head.Tile, door.Direction);
                 head = new CorridorTile(nextTile, head, door.Direction);
                 path.Push(head);
+            }
+
+            if (!allowConnectionToConnectedArea && !RoomUnconnectedToAdjacentArea(door.Area,
+                dungeon.GetAdjacentTilesOfType(head.Tile, Space.WALKABLE, head.From.Tile)))
+            {
+                EraseDoor(door);
+                return;
             }
 
             // If the last tile is directly touching another room's interior, make this tile a door
@@ -358,8 +343,8 @@ namespace Dungeon_Generator
         /// <param name="dungeon"></param>
         /// <param name="door"></param>
         /// <param name="chanceToTurn"></param>
-        /// <param name="allowConnectionToConnectedPath"></param>
-        public void GenerateCorridor(Dungeon dungeon, Tile door, double chanceToTurn, bool allowConnectionToConnectedPath)
+        /// <param name="allowConnectionToConnectedArea"></param>
+        public void GenerateCorridor(Dungeon dungeon, Tile door, double chanceToTurn, bool allowConnectionToConnectedArea)
         {
             Tile startOfPath = dungeon.GetTileByDirection(door, door.Direction);
 
@@ -369,7 +354,14 @@ namespace Dungeon_Generator
 
             if (dungeon.IsTileAdjacentTo(door, Space.WALKABLE, dungeon.GetTileByDirection(door, Tile.Invert(door.Direction))))
             {
-                ConnectAreas(dungeon, door);
+                if (allowConnectionToConnectedArea || !door.Area.To.Contains(startOfPath.Area))
+                {
+                    ConnectAreas(dungeon, door);
+                }
+                else
+                {
+                    EraseDoor(door);
+                }
                 return;
             }
 
@@ -378,13 +370,32 @@ namespace Dungeon_Generator
 
             if (startOfPath.Space == Space.Wall)
             {
-                CorridorThroughRoomWall(dungeon, door, startOfPath);
+                CorridorThroughRoomWall(dungeon, door, startOfPath, allowConnectionToConnectedArea);
                 return;
             }
 
             // If there is solid stone ahead, start a path
 
-            CorridorWalk(dungeon, door, chanceToTurn, allowConnectionToConnectedPath);
+            CorridorWalk(dungeon, door, chanceToTurn, allowConnectionToConnectedArea);
+        }
+
+        private bool RoomUnconnectedToAdjacentArea(Area area, List<Tile> adjacents)
+        {
+            foreach (Tile adj in adjacents)
+            {
+                if (!area.To.Contains(adj.Area))
+                {
+                    return true;
+                }
+            }
+            return false;
+        }
+
+        private void EraseDoor(Tile door)
+        {
+            Room room = (Room)door.Area;
+            room.Doors.Remove(door);
+            door.Space = Space.Wall;
         }
 
         public void GenerateCorridors(Dungeon dungeon, double chanceToTurn)
@@ -394,10 +405,10 @@ namespace Dungeon_Generator
                 // If no corridor can be formed from a door, the door is removed
                 // So a room's list of doors may shrink as we iterate over it
 
-                bool allowConnectionToConnectedPath = true;
+                bool allowConnectionToConnectedArea = true;
                 for (int i = room.Doors.Count - 1; i >= 0; --i)
                 {
-                    GenerateCorridor(dungeon, room.Doors[i], chanceToTurn, allowConnectionToConnectedPath);
+                    GenerateCorridor(dungeon, room.Doors[i], chanceToTurn, allowConnectionToConnectedArea);
                 }
             }
         }
