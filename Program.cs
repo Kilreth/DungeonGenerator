@@ -23,7 +23,7 @@ namespace Dungeon_Generator
             Form1 obj = new Form1(dungeonGenerator.Dungeon);
             Application.Run(obj);
 
-            dungeonGenerator.MakeConnectedGraph(dungeonGenerator.Dungeon, 0.2);
+            dungeonGenerator.MakeDungeonACompleteGraph(dungeonGenerator.Dungeon, 0.2);
             dungeonGenerator.GenerateStairsAndKey(dungeonGenerator.Dungeon);
             obj = new Form1(dungeonGenerator.Dungeon);
             Application.Run(obj);

@@ -12,6 +12,14 @@ namespace Dungeon_Generator
         public Dungeon Dungeon { get; }
         public static Random Rng { get; }
 
+        /// <summary>
+        /// Choose a random start room.
+        /// Choose the farthest room from that as the goal room.
+        /// Choose a room with medium distance to place the key in.
+        /// 
+        /// Rooms are ordered by BFS so the heuristic is number of rooms+paths crossed.
+        /// </summary>
+        /// <param name="dungeon"></param>
         public void GenerateStairsAndKey(Dungeon dungeon)
         {
             // Although very unlikely, it is possible not all rooms at this point are connected
@@ -33,6 +41,7 @@ namespace Dungeon_Generator
             }
 
             // The goal room is the farthest room encountered in the breadth-first search
+            // The room with the key is somewhere in the middle
             Room goalRoom = roomsFromStart[totalRooms - 1];
             Room keyRoom  = roomsFromStart[Rng.Next((int)(totalRooms * 0.4), (int)(totalRooms * 0.6))];
 
@@ -41,7 +50,22 @@ namespace Dungeon_Generator
             keyRoom.GetRandomTile(dungeon).Space = Space.Key;
         }
 
-        public void MakeConnectedGraph(Dungeon dungeon, double chanceToTurn)
+        /// <summary>
+        /// Prior corridor generation simply looks for other rooms and paths to connect to.
+        /// There is no guarantee that every room can be reached from a given room.
+        /// Here we attempt to find rooms unconnected to the largest graph, and connect
+        /// them by *spawning a new door and attempting to generate a new corridor*.
+        /// 
+        /// Because there may be limited space for corridors, we must not waste it, so we discard
+        /// any new doors+corridors that make a duplicate connection.
+        /// 
+        /// There may be unconnected rooms even after this, but they are very rare.
+        /// Moreover, because stair and key generation use the connected graph,
+        /// any isolated rooms are harmless.
+        /// </summary>
+        /// <param name="dungeon"></param>
+        /// <param name="chanceToTurn"></param>
+        public void MakeDungeonACompleteGraph(Dungeon dungeon, double chanceToTurn)
         {
             List<Room> unconnectedRooms = dungeon.FindUnconnectedRooms(dungeon.GetRandomRoom());
             int tries = 0;
@@ -73,7 +97,7 @@ namespace Dungeon_Generator
 
         /// <summary>
         /// Link all adjacent walkable areas to the area a given tile belongs to.
-        /// For example, link the end of a path to the room behind a door.
+        /// For example, link the end of a path to the room belonging to a door.
         /// </summary>
         /// <param name="dungeon"></param>
         /// <param name="tile"></param>
@@ -88,6 +112,11 @@ namespace Dungeon_Generator
             }
         }
 
+        /// <summary>
+        /// Commits a stack of wrapped corridor tiles to the dungeon.
+        /// </summary>
+        /// <param name="dungeon"></param>
+        /// <param name="path"></param>
         public void CarveCorridor(Dungeon dungeon, Stack<CorridorTile> path)
         {
             // Unwrap the tiles in the stack to populate a set
@@ -195,7 +224,8 @@ namespace Dungeon_Generator
                 // Can we carve this tile?
 
                 // If a door is on the head of the stack, it belongs to the room we came from.
-                // Treat those doors as walls.
+                // (If we had found a door to another room, we would already have exited the while loop)
+                // Treat these doors as walls.
 
                 if (head.Space == Space.Wall || head.Space == Space.Granite || head.Space == Space.Door)
                 {
@@ -272,6 +302,63 @@ namespace Dungeon_Generator
             door.Space = Space.Wall;
         }
 
+        /// <summary>
+        /// If a door opens into the wall of another room, carving straight ahead is guaranteed
+        /// to open into that room. Make a door at the other end.
+        /// It's possible that if the door opens into the corner of another room, our corridor
+        /// opens into another corridor first. This is fine, just don't make the last tile a door.
+        /// </summary>
+        /// <param name="dungeon"></param>
+        /// <param name="door"></param>
+        /// <param name="startOfPath"></param>
+        public void CorridorThroughRoomWall(Dungeon dungeon, Tile door, Tile startOfPath)
+        {
+            // Prepare a stack of path tiles so we can call our general method to carve the corridor
+
+            Stack<CorridorTile> path = new Stack<CorridorTile>();
+            CorridorTile wrappedDoor = new CorridorTile(door, null, door.Direction);
+            CorridorTile head = new CorridorTile(startOfPath, wrappedDoor, door.Direction);
+            path.Push(head);
+            while (!dungeon.IsTileAdjacentTo(head.Tile, Space.WALKABLE, head.From.Tile))
+            {
+                Tile nextTile = dungeon.GetTileByDirection(head.Tile, door.Direction);
+                head = new CorridorTile(nextTile, head, door.Direction);
+                path.Push(head);
+            }
+
+            // If the last tile is directly touching another room's interior, make this tile a door
+            // As a wall tile originally, the door tile is already facing out from its room
+
+            Tile otherDoor = path.Peek().Tile;
+            if (dungeon.IsTileAdjacentTo(otherDoor, Space.Room))
+            {
+                path.Pop();
+                Room otherRoom = (Room)otherDoor.Area;
+                otherRoom.SetTileAsDoor(otherDoor);
+            }
+
+            // If we didn't pop our only path tile off of the stack, carve the remaining corridor
+
+            if (path.Count > 0)
+            {
+                CarveCorridor(dungeon, path);
+            }
+            else
+            {
+                ConnectAreas(dungeon, door);
+            }
+        }
+
+        /// <summary>
+        /// Account for all the cases a door may open into.
+        ///   - Another room. Carve no corridor, just link areas
+        ///   - A wall of another room. Carve a corridor straight ahead until a walkable space is found
+        ///   - Solid rock. Call the flood-fill search to find a door or path for a corridor to connect to
+        /// </summary>
+        /// <param name="dungeon"></param>
+        /// <param name="door"></param>
+        /// <param name="chanceToTurn"></param>
+        /// <param name="allowConnectionToConnectedPath"></param>
         public void GenerateCorridor(Dungeon dungeon, Tile door, double chanceToTurn, bool allowConnectionToConnectedPath)
         {
             Tile startOfPath = dungeon.GetTileByDirection(door, door.Direction);
@@ -291,40 +378,7 @@ namespace Dungeon_Generator
 
             if (startOfPath.Space == Space.Wall)
             {
-                // Prepare a stack of path tiles so we can call our general method to carve the corridor
-
-                Stack<CorridorTile> path = new Stack<CorridorTile>();
-                CorridorTile wrappedDoor = new CorridorTile(door, null, door.Direction);
-                CorridorTile head = new CorridorTile(startOfPath, wrappedDoor, door.Direction);
-                path.Push(head);
-                while (!dungeon.IsTileAdjacentTo(head.Tile, Space.WALKABLE, head.From.Tile))
-                {
-                    Tile nextTile = dungeon.GetTileByDirection(head.Tile, door.Direction);
-                    head = new CorridorTile(nextTile, head, door.Direction);
-                    path.Push(head);
-                }
-
-                // If the last tile is directly touching another room's interior, make this tile a door
-                // As a wall tile originally, the door tile is already facing out from its room
-
-                Tile otherDoor = path.Peek().Tile;
-                if (dungeon.IsTileAdjacentTo(otherDoor, Space.Room))
-                {
-                    path.Pop();
-                    Room otherRoom = (Room)otherDoor.Area;
-                    otherRoom.SetTileAsDoor(otherDoor);
-                }
-
-                // If we didn't pop our only path tile off of the stack, carve the remaining corridor
-
-                if (path.Count > 0)
-                {
-                    CarveCorridor(dungeon, path);
-                }
-                else
-                {
-                    ConnectAreas(dungeon, door);
-                }
+                CorridorThroughRoomWall(dungeon, door, startOfPath);
                 return;
             }
 
@@ -356,6 +410,16 @@ namespace Dungeon_Generator
             }
         }
 
+        /// <summary>
+        /// Randomly fill an empty dungeon with rooms until a space ratio is reached,
+        /// or until adding another room is unsuccessful after a number of tries.
+        /// </summary>
+        /// <param name="dungeon"></param>
+        /// <param name="roomToDungeonRatio"></param>
+        /// <param name="minRoomHeight"></param>
+        /// <param name="minRoomWidth"></param>
+        /// <param name="maxRoomHeight"></param>
+        /// <param name="maxRoomWidth"></param>
         public void GenerateRooms(Dungeon dungeon, double roomToDungeonRatio,
                                      int minRoomHeight, int minRoomWidth, int maxRoomHeight, int maxRoomWidth)
         {
@@ -378,7 +442,7 @@ namespace Dungeon_Generator
 
                 // Create the room and put it in a random place
 
-                Room room = new Room(0, 0, 0, 0);   // initialized null value
+                Room room;
                 int row, col;
                 int dungeonEdge = 2;
                 int attempts = 0;
@@ -386,7 +450,7 @@ namespace Dungeon_Generator
                 {
                     row = Rng.Next(dungeonEdge, dungeon.Height - roomHeight - dungeonEdge + 1);
                     col = Rng.Next(dungeonEdge, dungeon.Width - roomWidth - dungeonEdge + 1);
-                    room.Replace(row, col, roomHeight, roomWidth);
+                    room = new Room(row, col, roomHeight, roomWidth);
                     ++attempts;
                 } while (!room.CanRoomFit(dungeon) && attempts != 100);
                 if (attempts == 100)
@@ -406,7 +470,8 @@ namespace Dungeon_Generator
             GenerateRooms(Dungeon, 0.9, 3, 3, 9, 9);
             GenerateDoors(Dungeon, 0.1);
             GenerateCorridors(Dungeon, 0.2);
-            //MakeConnectedGraph(Dungeon, 0.2);
+            //MakeDungeonACompleteGraph(Dungeon, 0.2);
+            //GenerateStairsAndKey(Dungeon);
         }
 
         static DungeonGenerator()

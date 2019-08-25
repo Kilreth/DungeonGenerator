@@ -6,8 +6,12 @@ using System.Threading.Tasks;
 
 namespace Dungeon_Generator
 {
+    /// <summary>
+    /// An environmental tile. A 2D array of Tiles forms a dungeon.
+    /// </summary>
     public class Tile
     {
+        // Debug flag draws the tile in a red border
         public bool Debug { get; set; }
         public string Text { get; set; }
 
@@ -44,6 +48,11 @@ namespace Dungeon_Generator
             throw new ArgumentNullException("direction", "Invert undefined for this direction");
         }
 
+        /// <summary>
+        /// Test for equality based on row and column coordinates.
+        /// </summary>
+        /// <param name="obj"></param>
+        /// <returns></returns>
         public override bool Equals(object obj)
         {
             if ((obj == null) || !this.GetType().Equals(obj.GetType()))
@@ -57,6 +66,10 @@ namespace Dungeon_Generator
             }
         }
 
+        /// <summary>
+        /// As with equality, only the row and column is considered for the hash code.
+        /// </summary>
+        /// <returns></returns>
         public override int GetHashCode()
         {
             return (Row << 2) ^ Col;
@@ -84,7 +97,7 @@ namespace Dungeon_Generator
     /// Room:    Vacant tiles in a room
     /// Wall:    The rock surrounding Room tiles
     /// Path:    Vacant tiles that make corridors connecting doors
-    /// Door:    Vacant tiles bridging rooms and paths
+    /// Door:    Vacant tiles connecting rooms and paths
     /// </summary>
     public enum Space { Granite, Rock, Room, Wall, Path, Door, StairsUp, StairsDown, Key, WALKABLE }
 }

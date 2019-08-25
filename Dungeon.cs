@@ -26,26 +26,26 @@ namespace Dungeon_Generator
 
         /// <summary>
         /// Perform a breadth-first search for all rooms accessible from a given start room.
-        /// Return a list of rooms that are accessible, or a list of rooms that are not.
+        /// Can return the list of rooms that are accessible, or a list of rooms that are not.
         /// If returning unconnected rooms, the list is not necessarily complete!
         /// </summary>
         /// <returns></returns>
         private List<Room> RoomGraphTraversal(Room start, bool returnConnectedRooms)
         {
-            HashSet<Area> visited = new HashSet<Area>();
+            HashSet<Area> visited = new HashSet<Area>();    // Rooms and Paths
             List<Room> visitedRooms = new List<Room>();
-            Queue<Area> toVisit = new Queue<Area>();
-            toVisit.Enqueue(start);
+            Queue<Area> queue = new Queue<Area>();
+            queue.Enqueue(start);
             visited.Add(start);
             visitedRooms.Add(start);
-            while (toVisit.Count > 0)
+            while (queue.Count > 0)
             {
-                Area area = toVisit.Dequeue();
+                Area area = queue.Dequeue();
                 foreach (Area neighbor in area.To)
                 {
                     if (!visited.Contains(neighbor))
                     {
-                        toVisit.Enqueue(neighbor);
+                        queue.Enqueue(neighbor);
                         visited.Add(neighbor);
                         if (neighbor is Room)
                         {
@@ -55,21 +55,21 @@ namespace Dungeon_Generator
                 }
             }
 
-            List<Room> unvisitedRooms = new List<Room>();
-            foreach (Room room in Rooms)
-            {
-                if (!visited.Contains(room))
-                {
-                    unvisitedRooms.Add(room);
-                }
-            }
-
             if (returnConnectedRooms)
             {
                 return visitedRooms;
             }
             else
             {
+                List<Room> unvisitedRooms = new List<Room>();
+                foreach (Room room in Rooms)
+                {
+                    if (!visited.Contains(room))
+                    {
+                        unvisitedRooms.Add(room);
+                    }
+                }
+
                 // We determine the unconnected rooms as the smaller of the two lists
 
                 if (unvisitedRooms.Count < visitedRooms.Count)
@@ -160,6 +160,15 @@ namespace Dungeon_Generator
             return GetTileByDirection(tile, tile.Direction);
         }
 
+        /// <summary>
+        /// Up:    Decreasing rows
+        /// Down:  Increasing rows
+        /// Left:  Decreasing columns
+        /// Right: Increasing columns
+        /// </summary>
+        /// <param name="tile"></param>
+        /// <param name="direction"></param>
+        /// <returns></returns>
         public Tile GetTileByDirection(Tile tile, Direction direction)
         {
             if (direction == Direction.None)
@@ -182,7 +191,7 @@ namespace Dungeon_Generator
             {
                 return GetTile(tile.Row, tile.Col + 1);
             }
-            throw new ArgumentNullException("direction", "Unknown how to use this direction");
+            throw new ArgumentNullException("direction", "Unknown how to follow this direction");
         }
 
         public bool IsTileWithinDungeon(int row, int col)
@@ -208,6 +217,13 @@ namespace Dungeon_Generator
             return Rooms[DungeonGenerator.Rng.Next(0, Rooms.Count)];
         }
 
+        /// <summary>
+        /// Assigns a material to every tile in a room.
+        /// Useful for carving a room's walls and the inner walkable space.
+        /// </summary>
+        /// <param name="room"></param>
+        /// <param name="space"></param>
+        /// <param name="area"></param>
         private void CarveRoomHelper(Room room, Space space, Area area)
         {
             int rowToStop = room.FirstRow + room.Height;
@@ -223,6 +239,10 @@ namespace Dungeon_Generator
             }
         }
 
+        /// <summary>
+        /// Commit a Room object to the dungeon.
+        /// </summary>
+        /// <param name="room"></param>
         public void CarveRoom(Room room)
         {
             CarveRoomHelper(room.Outer, Space.Wall, room);
@@ -231,7 +251,7 @@ namespace Dungeon_Generator
         }
 
         /// <summary>
-        /// Creates and returns a blank slate for a dungeon.
+        /// Create a blank slate for the dungeon.
         /// </summary>
         public void Initialize()
         {

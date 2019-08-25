@@ -17,12 +17,18 @@ namespace Dungeon_Generator
         public int FirstCol { get; private set; }
         public int Height { get; private set; }
         public int Width { get; private set; }
-        public int NumTiles { get; private set; }
 
         public Room Outer { get; private set; }
         public List<Tile> Doors { get; private set; }
         private List<Tile> walls { get; set; }
 
+        /// <summary>
+        /// Determines if a room can be placed where it is, or if it must be discarded.
+        /// Notably, all open tiles in the room must be rock.
+        /// The walls of this room can overlap with walls of other rooms.
+        /// </summary>
+        /// <param name="dungeon"></param>
+        /// <returns></returns>
         public bool CanRoomFit(Dungeon dungeon)
         {
             InitialiseOuter();
@@ -72,6 +78,12 @@ namespace Dungeon_Generator
             }
         }
 
+        /// <summary>
+        /// Randomly chooses a wall tile as a door.
+        /// Does not choose tiles touching an existing door, not even by a corner.
+        /// </summary>
+        /// <param name="dungeon"></param>
+        /// <returns></returns>
         public Tile GenerateDoor(Dungeon dungeon)
         {
             int tries = 0;
@@ -101,7 +113,8 @@ namespace Dungeon_Generator
         }
 
         /// <summary>
-        /// Finds coordinates of all tiles with an edge next to the room.
+        /// Finds all tiles surrounding the walkable room space.
+        /// Also initializes the tiles' direction -- walls face outward.
         /// Corners are excluded.
         /// </summary>
         public void FindWallLocations(Dungeon dungeon)
@@ -144,11 +157,6 @@ namespace Dungeon_Generator
             return dungeon.GetTile(row, col);
         }
 
-        private void SetNumTiles()
-        {
-            NumTiles = Height * Width;
-        }
-
         private void InitialiseOuter()
         {
             if (Outer == null)
@@ -157,27 +165,16 @@ namespace Dungeon_Generator
             }
         }
 
-        private void Initialise(int firstRow, int firstCol, int height, int width)
+        public Room(int firstRow, int firstCol, int height, int width)
         {
             FirstRow = firstRow;
             FirstCol = firstCol;
             Height = height;
             Width = width;
-            SetNumTiles();
 
             Outer = null;
-            Doors = new List<Tile>();
             walls = null;
-        }
-
-        public void Replace(int firstRow, int firstCol, int height, int width)
-        {
-            Initialise(firstRow, firstCol, height, width);
-        }
-
-        public Room(int firstRow, int firstCol, int height, int width)
-        {
-            Initialise(firstRow, firstCol, height, width);
+            Doors = new List<Tile>();
         }
     }
 }

@@ -6,6 +6,12 @@ using System.Threading.Tasks;
 
 namespace Dungeon_Generator
 {
+    /// <summary>
+    /// An Area is a traversable place included in a dungeon's connected graph.
+    /// Currently these areas are Rooms and Paths.
+    /// 
+    /// Equality only consists of a unique ID.
+    /// </summary>
     public class Area
     {
         public HashSet<Area> To { get; private set; }
