@@ -83,7 +83,12 @@ namespace Dungeon_Generator
 
             while (Doors.Count < numDoors)
             {
-                GenerateDoor();
+                Tile door = GenerateDoor();
+                if (door == null)
+                {
+                    // If no space could be found for a door, end method
+                    return;
+                }
             }
         }
 
@@ -97,16 +102,16 @@ namespace Dungeon_Generator
             int tries = 0;
             while (tries < 100)
             {
-                // Because rooms can share walls, some wall tiles may already be doors from another room!
+                // Because rooms can share walls, some wall tiles may already be doors from another room
                 // So check the actual tile as well as this room's list of doors
 
-                Tile door = walls[DungeonGenerator.Rng.Next(0, walls.Count)];
-                if (!Doors.Contains(door) && door.Space != Space.Door
-                    && !Dungeon.IsTileSurroundedBy(door, Space.Door)
-                    && Dungeon.GetTileByDirection(door).Space != Space.Granite)
+                Tile tile = walls[DungeonGenerator.Rng.Next(0, walls.Count)];
+                if (!Doors.Contains(tile) && tile.Space != Space.Door
+                    && !Dungeon.IsTileSurroundedBy(tile, Space.Door)
+                    && Dungeon.GetTileByDirection(tile).Space != Space.Granite)
                 {
-                    SetTileAsDoor(door);
-                    return door;
+                    SetTileAsDoor(tile);
+                    return tile;
                 }
                 ++tries;
             }

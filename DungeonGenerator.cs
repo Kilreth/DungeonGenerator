@@ -83,10 +83,6 @@ namespace Dungeon_Generator
                     bool allowConnectionToConnectedArea = false;
                     GenerateCorridor(door, chanceToTurn, allowConnectionToConnectedArea);
                 }
-                else
-                {
-                    return;
-                }
 
                 unconnectedRooms = Dungeon.FindUnconnectedRooms(Dungeon.GetRandomRoom());
                 ++tries;
@@ -376,7 +372,7 @@ namespace Dungeon_Generator
         {
             foreach (Tile adj in adjacents)
             {
-                if (!area.To.Contains(adj.Area))
+                if (!area.IsRecursivelyConnectedTo(adj.Area))
                 {
                     return true;
                 }
@@ -448,6 +444,7 @@ namespace Dungeon_Generator
                 Room room;
                 int row, col;
                 int dungeonEdge = 2;
+                int maxAttempts = 500;
                 int attempts = 0;
                 do
                 {
@@ -455,14 +452,16 @@ namespace Dungeon_Generator
                     col = Rng.Next(dungeonEdge, Dungeon.Width - roomWidth - dungeonEdge + 1);
                     room = new Room(Dungeon, row, col, roomHeight, roomWidth);
                     ++attempts;
-                } while (!room.CanRoomFit() && attempts != 100);
-                if (attempts == 100)
+                } while (!room.CanRoomFit() && attempts != maxAttempts);
+                if (attempts == maxAttempts)
                 {
                     break;
                 }
 
                 room.InitializeArea();
                 Dungeon.CarveRoom(room);
+
+                // If rooms are not allowed to share walls, then roomHeight and roomWidth need +2 size below
                 remainingRoomTiles -= roomHeight * roomWidth;
             }
         }

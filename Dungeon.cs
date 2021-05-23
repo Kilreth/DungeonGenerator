@@ -14,6 +14,21 @@ namespace Dungeon_Generator
         public List<Room> Rooms { get; }
         public List<Path> Paths { get; }
 
+        public List<Room> GetConnectedDungeon()
+        {
+            // We want the largest set of connected rooms. This may not necessarily
+            // be a majority of rooms, so gradually lower the target size of the set.
+            List<Room> roomsFromStart;
+            int tries = 0;
+            do
+            {
+                ++tries;
+                roomsFromStart = FindConnectedRooms(GetRandomRoom());
+            }
+            while (roomsFromStart.Count * 2 < Rooms.Count - tries);
+            return roomsFromStart;
+        }
+
         public List<Room> FindUnconnectedRooms(Room start)
         {
             return RoomGraphTraversal(start, false);
@@ -56,30 +71,16 @@ namespace Dungeon_Generator
             }
 
             if (returnConnectedRooms)
-            {
                 return visitedRooms;
-            }
             else
             {
                 List<Room> unvisitedRooms = new List<Room>();
                 foreach (Room room in Rooms)
-                {
                     if (!visited.Contains(room))
-                    {
                         unvisitedRooms.Add(room);
-                    }
-                }
 
                 // We determine the unconnected rooms as the smaller of the two lists
-
-                if (unvisitedRooms.Count < visitedRooms.Count)
-                {
-                    return unvisitedRooms;
-                }
-                else
-                {
-                    return visitedRooms;
-                }
+                return unvisitedRooms.Count < visitedRooms.Count ? unvisitedRooms : visitedRooms;
             }
         }
 
@@ -148,10 +149,16 @@ namespace Dungeon_Generator
                 surrounding.Add(GetTile(tile.Row + 1, tile.Col - 1));
                 surrounding.Add(GetTile(tile.Row + 1, tile.Col + 1));
             }
-            if (from != null)
+
+            // This is harmless if "from" tile is null
+            surrounding.Remove(from);
+
+            // Null tiles are tiles outside the dungeon boundary -- eg. (-1, 0). Remove these
+            while (surrounding.Contains(null))
             {
-                surrounding.Remove(from);
+                surrounding.Remove(null);
             }
+
             return surrounding;
         }
 
@@ -209,7 +216,11 @@ namespace Dungeon_Generator
 
         public Tile GetTile(int row, int col)
         {
-            return Tiles[row, col];
+            if (IsTileWithinDungeon(row, col))
+            {
+                return Tiles[row, col];
+            }
+            return null;
         }
 
         public Room GetRandomRoom()

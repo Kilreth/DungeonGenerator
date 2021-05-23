@@ -48,6 +48,11 @@ namespace Dungeon_Generator
             throw new ArgumentNullException("direction", "Invert undefined for this direction");
         }
 
+        public override string ToString()
+        {
+            return string.Format("(row {0}, col {1}, block {2})", Row, Col, Space);
+        }
+
         /// <summary>
         /// Test for equality based on row and column coordinates.
         /// </summary>
